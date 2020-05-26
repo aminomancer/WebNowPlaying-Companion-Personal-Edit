@@ -177,13 +177,13 @@ function setupNew()
 		if (document.getElementById('playlist') === null || !document.getElementById('playlist').hasAttribute('has-playlist-buttons')) {
 			document.getElementsByClassName("ytp-next-button")[0].click();
 		} else if (document.getElementById("playlist-actions").children[0].children[0].children[0].children[0].children[1].getAttribute("class").includes("active")) {
-			document.getElementsByClassName('playlist-items')[0].children[Math.floor(Math.random() * document.getElementsByClassName('playlist-items')[0].children.length)].getElementsByClassName('editable')[0].click();
+			document.getElementsByClassName('playlist-items')[0].children[Math.floor(Math.random() * document.getElementsByClassName('playlist-items')[0].children.length)].querySelector('#meta').click();
 		} else {
 			if (!document.getElementsByClassName('playlist-items')[0].lastChild.hasAttribute('selected')) {
-				document.getElementsByClassName('playlist-items')[0].querySelector('#playlist-items[selected]').nextSibling.getElementsByClassName('editable')[0].click();
+				document.getElementsByClassName('playlist-items')[0].querySelector('#playlist-items[selected]').nextSibling.querySelector('#meta').click();
 			} else {
 				if (document.getElementById("playlist-actions").children[0].children[0].children[0].children[0].children[0].getAttribute("class").includes("active")) {
-					document.getElementsByClassName('playlist-items')[0].children[0].getElementsByClassName('editable')[0].click();
+					document.getElementsByClassName('playlist-items')[0].children[0].querySelector('#meta').click();
 				} else {
 					document.getElementsByClassName("ytp-next-button")[0].click();
 				}
