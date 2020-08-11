@@ -4,181 +4,187 @@
   "name": "WebNowPlaying Companion - Personal Edit",
   "short_name": "WebNowPlayingPersonal",
   "description": "Modified 'previous' function on YouTube to rewind to the beginning if the video has already started, and skip to the previous track (in playlist or autoplay) if pressed during the first 3 seconds of a video. So you can double-click the rewind button to go back, and single-click to rewind to the beginning. Modified 'next' function to loop back to the first video in a playlist if loop is enabled and you're on the last video in the playlist. If shuffle is enabled and you're on the last video in the playlist, then the 'next' function will pick a random playlist index and play that video. This should eliminate the problem where the 'next' function picks the 'suggested video' instead of continuing the playlist. Also fixes all YouTube functions which were recently broken by DOM changes to the UI, including shuffle, loop, rating, and like/dislike. Should eliminate the constant stream of rainmeter errors.",
-  "version": "0.5.3",
+  "version": "0.5.6",
   "applications": {
     "gecko": {
       "id": "WNPC@aminomancer",
       "strict_min_version": "57.0a1"
     }
   },
-  "icons":
-  {
+  "icons": {
     "16": "icon16.png",
     "48": "icon48.png",
     "128": "icon128.png"
   },
-  "browser_action":
-  {
-  },
+  "browser_action": {},
   "permissions": [
     "tabs",
     "webNavigation",
     "storage"
   ],
-  "background":
-  {
+  "background": {
     "scripts": ["Background.js"],
     "persistent": false
   },
-  "options_ui":
-  {
+  "options_ui": {
     "page": "Options.html"
   },
-  "content_scripts": [
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://music.yandex.*/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/YandexMusic.js"
-    ]
-  },
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://play.google.*/music/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/GooglePlayMusic.js"
-    ]
-  },
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://music.youtube.*/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/YoutubeMusic.js"
-    ]
-  },
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://www.youtube.*/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/Youtube.js",
-      "Websites/YoutubeNew.js",
-      "Websites/YoutubeTV.js",
-      "Websites/YoutubeSelector.js"
-    ]
-  },
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://soundcloud.*/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/Soundcloud.js"
-    ]
-  },
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://listen.tidal.*/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/Tidal.js"
-    ]
-  },
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://music.amazon.*/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/AmazonMusic.js"
-    ]
-  },
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://www.pandora.*/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/Pandora.js"
-    ]
-  },
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://open.spotify.*/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/Spotify.js"
-    ]
-  },
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://www.deezer.*/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/Deezer.js"
-    ]
-  },
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://play.pocketcasts.*/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/PocketCasts.js"
-    ]
-  },
-  {
-    "matches":        ["*://*/*"],
-    "include_globs": [
-      "*://app.plex.tv/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/Plex.js"
-    ]
-  },
-  {
-    "matches": [
-      "<all_urls>"
-    ],
-    "exclude_globs": [
-      "*://music.yandex.*/*",
-      "*://play.google.*/music/*",
-      "*://music.youtube.*/*",
-      "*://www.youtube.*/*",
-      "*://soundcloud.*/*",
-      "*://listen.tidal.*/*",
-      "*://music.amazon.*/*",
-      "*://www.pandora.*/*",
-      "*://open.spotify.*/*",
-      "*://www.deezer.*/*",
-      "*://play.pocketcasts.*/*",
-      "*://app.plex.tv/*"
-    ],
-    "js": [
-      "WebNowPlaying.js",
-      "Websites/Generic.js"
-    ]
-  }]
+  "content_scripts": [{
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://music.yandex.*/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/YandexMusic.js"
+      ]
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://play.google.*/music/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/GooglePlayMusic.js"
+      ]
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://music.youtube.*/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/YoutubeMusic.js"
+      ]
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://www.youtube.*/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/Youtube.js",
+        "Websites/YoutubeNew.js",
+        "Websites/YoutubeTV.js",
+        "Websites/YoutubeSelector.js"
+      ]
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://www.youtube.com/embed/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/YoutubeEmbedded.js"
+      ],
+      "all_frames": true
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://soundcloud.*/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/Soundcloud.js"
+      ]
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://listen.tidal.*/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/Tidal.js"
+      ]
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://music.amazon.*/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/AmazonMusic.js"
+      ]
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://www.pandora.*/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/Pandora.js"
+      ]
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://open.spotify.*/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/Spotify.js"
+      ]
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://www.deezer.*/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/Deezer.js"
+      ]
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://play.pocketcasts.*/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/PocketCasts.js"
+      ]
+    },
+    {
+      "matches": ["*://*/*"],
+      "include_globs": [
+        "*://app.plex.tv/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/Plex.js"
+      ]
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "exclude_globs": [
+        "*://music.yandex.*/*",
+        "*://play.google.*/music/*",
+        "*://music.youtube.*/*",
+        "*://www.youtube.*/*",
+        "*://soundcloud.*/*",
+        "*://listen.tidal.*/*",
+        "*://music.amazon.*/*",
+        "*://www.pandora.*/*",
+        "*://open.spotify.*/*",
+        "*://www.deezer.*/*",
+        "*://play.pocketcasts.*/*",
+        "*://app.plex.tv/*"
+      ],
+      "js": [
+        "WebNowPlaying.js",
+        "Websites/Generic.js"
+      ]
+    }
+  ]
 }

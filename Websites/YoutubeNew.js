@@ -95,12 +95,12 @@ function setupNew()
 		{
 			lastImgVideoID = videoID;
 			var img = document.createElement('img');
-			img.setAttribute('src', "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?");
+			img.setAttribute('src', "https://i.ytimg.com/vi/" + videoID + "/hqdefault.jpg?");
 			img.addEventListener('load', function()
 			{
 				if (img.height > 90)
 				{
-					currIMG = "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?";
+					currIMG = "https://i.ytimg.com/vi/" + videoID + "/hqdefault.jpg?";
 				}
 				else
 				{
