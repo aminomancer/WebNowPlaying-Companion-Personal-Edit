@@ -10,7 +10,7 @@ function setupTV()
 
 	youtubeInfoHandler.player = function()
 	{
-		return "Youtube TV";
+		return "YouTube TV";
 	};
 
 	youtubeInfoHandler.readyCheck = function()

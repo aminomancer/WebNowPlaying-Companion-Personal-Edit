@@ -10,7 +10,7 @@ function setup()
 
 	ymInfoHandler.player = function()
 	{
-		return "Youtube Music";
+		return "YouTube Music";
 	};
 
 	ymInfoHandler.readyCheck = function()

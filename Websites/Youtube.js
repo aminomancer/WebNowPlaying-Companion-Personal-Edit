@@ -8,7 +8,7 @@ function setupOld() {
 	var youtubeInfoHandler = createNewMusicInfo();
 
 	youtubeInfoHandler.player = function () {
-		return "Youtube";
+		return "YouTube";
 	};
 
 	youtubeInfoHandler.readyCheck = function () {

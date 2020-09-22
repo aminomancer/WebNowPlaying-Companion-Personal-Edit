@@ -13,7 +13,7 @@ function setupEmbedded()
 
 	youtubeEmbeddedInfoHandler.player = function()
 	{
-		return "Youtube Embedded";
+		return "YouTube Embedded";
 	};
 
 	youtubeEmbeddedInfoHandler.readyCheck = function()
