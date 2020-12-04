@@ -1,6 +1,5 @@
-# Web Now Playing Companion - Unofficial Updated Fork
+# Web Now Playing Companion Extension - Unofficial Updated Fork
 [Source code](https://github.com/shmediaproductions/WebNowPlaying-Companion-Personal-Edit/releases)
-
 The extension to go along with the WebNowPlaying plugin for Rainmeter  
 Source code and downloads for the Rainmeter plugin can be found [here](https://github.com/tjhrulz/WebNowPlaying-BrowserExtension)  
   
