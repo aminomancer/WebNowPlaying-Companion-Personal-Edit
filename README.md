@@ -9,6 +9,7 @@ The original extension can be found in both the [Chrome Web Store](https://chrom
 
 ### List of supported sites:
 - Youtube (Both new and old layouts)
+- Embedded Youtube videos/playlists on any webpage
 - Soundcloud
 - Google Play Music
 - Amazon Music
@@ -18,5 +19,5 @@ The original extension can be found in both the [Chrome Web Store](https://chrom
 - Deezer
 - Plex (Music)
 - PocketCasts
-- Generic site support that can be turned on in the settings
+- Generic site support that can be turned on in the settings (works with Netflix)
 
