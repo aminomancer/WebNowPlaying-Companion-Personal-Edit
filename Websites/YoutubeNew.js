@@ -36,7 +36,7 @@ function setupNew() {
         return document.getElementsByClassName("ytd-video-primary-info-renderer title")[0].innerText;
     };
     youtubeInfoHandler.artist = function () {
-        return document.querySelector(".ytd-video-secondary-info-renderer .ytd-channel-name").innerText;
+        return document.querySelector("#upload-info yt-formatted-string.ytd-channel-name").innerText;
     };
     youtubeInfoHandler.album = function () {
         //If using a playlist just use the title of that
@@ -98,7 +98,7 @@ function setupNew() {
     youtubeInfoHandler.cover = function () {
         var videoID = window.location.href.substring(window.location.href.indexOf("v=") + 2, window.location.href.indexOf("v=") + 2 + 11);
 
-        if (lastImgVideoID !== videoID && videoID !== "ttps://www.") {
+        if (lastImgVideoID !== videoID && videoID !== "ttps://www." && videoID !== null) {
             lastImgVideoID = videoID;
             var img = document.createElement("img");
             img.setAttribute("src", "https://i.ytimg.com/vi/" + videoID + "/hqdefault.jpg?");
@@ -127,18 +127,10 @@ function setupNew() {
     };
     youtubeInfoHandler.rating = function () {
         //Check if thumbs button is active
-        if (
-            document
-                .getElementById("menu-container")
-                .children[0].children[0].children[0].children[0].children[0].children[0].children[0].getAttribute("aria-pressed") == "true"
-        ) {
+        if (document.getElementById("menu-container").getElementsByTagName("button")[0].getAttribute("aria-pressed") == "true") {
             return 5;
         }
-        if (
-            document
-                .getElementById("menu-container")
-                .children[0].children[0].children[0].children[1].children[0].children[0].children[0].getAttribute("aria-pressed") == "true"
-        ) {
+        if (document.getElementById("menu-container").getElementsByTagName("button")[1].getAttribute("aria-pressed") == "true") {
             return 1;
         }
         return 0;
@@ -147,24 +139,14 @@ function setupNew() {
         if (document.getElementsByClassName("html5-main-video")[0].loop == true) {
             return 2;
         }
-        if (document.getElementById("playlist-actions").children[0].children[0].children.length > 0) {
-            return document
-                .getElementById("playlist-actions")
-                .children[0].children[0].children[0].children[0].children[0].getAttribute("class")
-                .includes("active")
-                ? 1
-                : 0;
+        if (document.getElementById("playlist-action-menu").children.length > 0) {
+            return document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class").includes("active") ? 1 : 0;
         }
         return 0;
     };
     youtubeInfoHandler.shuffle = function () {
-        if (document.getElementById("playlist-actions").children[0].children[0].children.length > 0) {
-            return document
-                .getElementById("playlist-actions")
-                .children[0].children[0].children[0].children[0].children[1].getAttribute("class")
-                .includes("active")
-                ? 1
-                : 0;
+        if (document.getElementById("playlist-action-menu").children.length > 0) {
+            return document.getElementById("playlist-action-menu").children[0].children[0].children[1].getAttribute("class").includes("active") ? 1 : 0;
         }
         return 0;
     };
@@ -181,9 +163,7 @@ function setupNew() {
     youtubeEventHandler.next = function () {
         if (document.getElementById("playlist") === null || !document.getElementById("playlist").hasAttribute("has-playlist-buttons")) {
             document.getElementsByClassName("ytp-next-button")[0].click();
-        } else if (
-            document.getElementById("playlist-actions").children[0].children[0].children[0].children[0].children[1].getAttribute("class").includes("active")
-        ) {
+        } else if (currShuffle == 1) {
             document
                 .getElementsByClassName("playlist-items")[0]
                 .children[Math.floor(Math.random() * document.getElementsByClassName("playlist-items")[0].children.length)].querySelector("#meta")
@@ -192,12 +172,7 @@ function setupNew() {
             if (!document.getElementsByClassName("playlist-items")[0].lastChild.hasAttribute("selected")) {
                 document.getElementsByClassName("playlist-items")[0].querySelector("#playlist-items[selected]").nextSibling.querySelector("#meta").click();
             } else {
-                if (
-                    document
-                        .getElementById("playlist-actions")
-                        .children[0].children[0].children[0].children[0].children[0].getAttribute("class")
-                        .includes("active")
-                ) {
+                if (document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class").includes("active")) {
                     document.getElementsByClassName("playlist-items")[0].children[0].querySelector("#meta").click();
                 } else {
                     document.getElementsByClassName("ytp-next-button")[0].click();
@@ -235,39 +210,32 @@ function setupNew() {
             //Each if is a different state, first is loop none, second is loop one, last is loop all order triggered is still the usual none->all->one
             if (document.getElementsByClassName("html5-main-video")[0].loop == true) {
                 document.getElementsByClassName("html5-main-video")[0].loop = false;
-                if (
-                    document
-                        .getElementById("playlist-actions")
-                        .children[0].children[0].children[0].children[0].children[0].getAttribute("class")
-                        .includes("active")
-                ) {
-                    document.getElementById("playlist-actions").children[0].children[0].children[0].children[0].children[0].click();
+                if (document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class").includes("active")) {
+                    document.getElementById("playlist-action-menu").children[0].children[0].children[0].click();
                 }
-            } else if (
-                document.getElementById("playlist-actions").children[0].children[0].children[0].children[0].children[0].getAttribute("class").includes("active")
-            ) {
+            } else if (document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class").includes("active")) {
                 document.getElementsByClassName("html5-main-video")[0].loop = true;
             } else {
-                document.getElementById("playlist-actions").children[0].children[0].children[0].children[0].children[0].click();
+                document.getElementById("playlist-action-menu").children[0].children[0].children[0].click();
             }
         }
     };
     youtubeEventHandler.shuffle = function () {
         if (document.getElementById("playlist-actions") !== null) {
-            document.getElementById("playlist-actions").children[0].children[0].children[0].children[0].children[1].click();
+            document.getElementById("playlist-action-menu").children[0].children[0].children[1].click();
         }
     };
     youtubeEventHandler.toggleThumbsUp = function () {
-        document.getElementById("menu-container").children[0].children[0].children[0].children[0].children[0].children[0].click();
+        document.getElementById("menu-container").getElementsByTagName("button")[0].click();
     };
     youtubeEventHandler.toggleThumbsDown = function () {
-        document.getElementById("menu-container").children[0].children[0].children[0].children[1].children[0].children[0].click();
+        document.getElementById("menu-container").getElementsByTagName("button")[1].click();
     };
     youtubeEventHandler.rating = function (rating) {
         if (rating > 3) {
-            document.getElementById("menu-container").getElementsByTagName("ytd-toggle-button-renderer")[0].click();
+            document.getElementById("menu-container").getElementsByTagName("button")[0].click();
         } else if (rating < 3) {
-            document.getElementById("menu-container").getElementsByTagName("ytd-toggle-button-renderer")[1].click();
+            document.getElementById("menu-container").getElementsByTagName("button")[1].click();
         }
     };
 }

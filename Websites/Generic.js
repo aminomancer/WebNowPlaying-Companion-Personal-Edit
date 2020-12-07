@@ -213,12 +213,15 @@ function setup()
 	};
 	genericInfoHandler.cover = function()
 	{
-		if (element.poster !== undefined)
-		{
-			return element.poster;
-		}
-		return document.querySelector('meta[property="og:image"]').content;
-	};
+        if (element.poster !== undefined) {
+            return element.poster;
+        }
+        try {
+            return document.querySelector('meta[property="og:image"]').content;
+        } catch (e) {
+            return;
+        }
+    };
 	genericInfoHandler.duration = function()
 	{
 		return element.duration;
