@@ -23,7 +23,6 @@ var ws;
 var connected = false;
 var reconnect;
 var sendData;
-var outdatedCheck;
 
 var musicEvents;
 var musicInfo;
@@ -163,8 +162,9 @@ function updateInfo()
 				{
 					ws.send("STATE:" + temp);
 					currState = temp;
+                    if (currState > 0) chrome.runtime.sendMessage({ method: "open" });
 				}
-			}
+            }
 		}
 		catch (e)
 		{
@@ -545,25 +545,19 @@ function init()
 		connected = true;
 		currPlayer = musicInfo.player();
 		ws.send("PLAYER:" + currPlayer);
-		//If this is not cleared in 1000 seconds then assume plugin version is so old it has no version send
-		outdatedCheck = setTimeout(function()
-		{
-			chrome.runtime.sendMessage(
-				{"method": "flagAsOutdated"}
-			);
-		}, 500);
 		//@TODO Dynamic update rate based on success rate
 		sendData = setInterval(function()
 		{
 			updateInfo();
-		}, 50);
+        }, 50);
+        if (!currState > 0) {
+            chrome.runtime.sendMessage({ method: "closed" });
+        }
 	};
 	ws.onclose = function()
 	{
 		connected = false;
-		chrome.runtime.sendMessage(
-			{"method": "flagAsNotConnected"}
-		);
+		chrome.runtime.sendMessage({ method: "closed" });
 		clearInterval(sendData);
 		reconnect = setTimeout(function()
 		{
@@ -572,26 +566,6 @@ function init()
 	};
 	ws.onmessage = function(event)
 	{
-		var versionNumber = event.data.toLowerCase().split(":");
-		if (versionNumber[0].includes("version"))
-		{
-			//Check that version number is the same major version
-			if (versionNumber[1].split(".")[1] < 4)
-			{
-				chrome.runtime.sendMessage(
-					{"method": "flagAsOutdated"}
-				);
-			}
-			else
-			{
-				//Clear timeout set above
-				clearTimeout(outdatedCheck);
-
-				chrome.runtime.sendMessage(
-					{"method": "flagAsConnected"}
-				);
-			}
-		}
 		try
 		{
 			fireEvent(event);
@@ -632,5 +606,6 @@ function init()
 window.onbeforeunload = function()
 {
 	ws.onclose = function() {}; // disable onclose handler first
-	ws.close();
+    ws.close();
+    chrome.runtime.sendMessage({ method: "closed" });
 };
