@@ -3,8 +3,8 @@
 
   "name": "WebNowPlaying Companion - Personal Edit",
   "short_name": "WebNowPlayingPersonal",
-  "description": "Modified 'previous' function on YouTube to rewind to the beginning if the video has already started, and skip to the previous track (in playlist or autoplay) if pressed during the first 3 seconds of a video. So you can double-click the rewind button to go back, and single-click to rewind to the beginning. Modified 'next' function to loop back to the first video in a playlist if loop is enabled and you're on the last video in the playlist. If shuffle is enabled and you're on the last video in the playlist, then the 'next' function will pick a random playlist index and play that video. This should eliminate the problem where the 'next' function picks the 'suggested video' instead of continuing the playlist. Also fixes all YouTube functions which were recently broken by DOM changes to the UI, including shuffle, loop, rating, and like/dislike. Should eliminate the constant stream of rainmeter errors.",
-  "version": "0.7.0",
+  "description": "WebNowPlaying Companion with a variety of modifications, fixes, and updates. Especially a lot of feature improvements and optimizations for YouTube.",
+  "version": "0.7.2",
   "applications": {
     "gecko": {
       "id": "WNPC@aminomancer",

@@ -4,15 +4,15 @@ function wInit() {
             attributeFilter: ["label"],
         },
         observer = new MutationObserver(prefToggle);
-    var node = CustomizableUI.getWidget("wnpc_aminomancer-browser-action").forWindow(window).node,
-        xpPref = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
+    var node = CustomizableUI.getWidget("wnpc_aminomancer-browser-action").forWindow(window).node;
 
     function xpSet(int) {
-        xpPref.setIntPref("dom.min_background_timeout_value", int), xpPref.setIntPref("dom.min_background_timeout_value_without_budget_throttling", int);
+        Services.prefs.setIntPref("dom.min_background_timeout_value", int),
+            Services.prefs.setIntPref("dom.min_background_timeout_value_without_budget_throttling", int);
     }
 
     function xpGet() {
-        return xpPref.getIntPref("dom.min_background_timeout_value");
+        return Services.prefs.getIntPref("dom.min_background_timeout_value");
     }
 
     function prefToggle(mutationsList) {

@@ -16,8 +16,8 @@ function setupNew() {
 
     youtubeInfoHandler.readyCheck = function () {
         return (
-            document.getElementsByClassName("ytd-video-primary-info-renderer title").length > 0 &&
-            document.getElementsByClassName("ytd-video-primary-info-renderer title")[0].innerText.length > 0
+            document.getElementsByClassName("ytd-video-primary-info-renderer title")?.length > 0 &&
+            document.getElementsByClassName("ytd-video-primary-info-renderer title")[0].innerText?.length > 0
         );
     };
 
@@ -44,6 +44,27 @@ function setupNew() {
             return document.getElementsByClassName("ytd-playlist-panel-renderer title")[0].innerText;
         }
 
+        //If video has a "Buy or Rent" module use the displayed title & year
+        let offer = document.getElementById("offer-module");
+        if (offer?.children.length) {
+            let info = offer.querySelector("#info"),
+                title = offer.querySelector("#title"),
+                result,
+                year;
+
+            if (title?.innerText.length > 0) {
+                if (info) {
+                    let released = document.evaluate("//yt-formatted-string[text()='Released']", info, null, XPathResult.ANY_TYPE, result).iterateNext();
+                    let module = released?.parentElement;
+                    year = module?.querySelector("[title]");
+                    year?.innerText?.length > 0 ? (currCategory = title?.innerText + " (" + year?.innerText + ")") : (currCategory = title?.innerText);
+                } else {
+                    currCategory = title?.innerText;
+                }
+                return currCategory;
+            }
+        }
+
         //If playing a video with a hashtag use that
         if (document.getElementsByClassName("super-title")[0].children.length > 0) {
             return document.getElementsByClassName("super-title")[0].children[0].innerText;
@@ -56,61 +77,55 @@ function setupNew() {
         ) {
             //Return category if visible else
             try {
-                var title = document.getElementsByClassName("sticky ytd-video-secondary-info-renderer")[0].querySelectorAll("#title")[0];
-                var subtitle = document.getElementsByClassName("sticky ytd-video-secondary-info-renderer")[0].querySelectorAll("#subtitle")[0];
-                var category = document.getElementsByClassName("sticky ytd-video-secondary-info-renderer")[0].querySelectorAll("#title")[1];
-                var catsub = document.getElementsByClassName("sticky ytd-video-secondary-info-renderer")[0].querySelectorAll("#subtitle")[1];
+                var title = document.getElementsByClassName("sticky ytd-video-secondary-info-renderer")[0]?.querySelectorAll("#title")[0];
+                var subtitle = document.getElementsByClassName("sticky ytd-video-secondary-info-renderer")[0]?.querySelectorAll("#subtitle")[0];
+                var category = document.getElementsByClassName("sticky ytd-video-secondary-info-renderer")[0]?.querySelectorAll("#title")[1];
+                var catsub = document.getElementsByClassName("sticky ytd-video-secondary-info-renderer")[0]?.querySelectorAll("#subtitle")[1];
             } catch (e) {
                 return currCategory;
             }
-            if (title.hidden == false && subtitle.hidden == false) {
-                currCategory = title.textContent + " (" + subtitle.textContent + ")";
-            } else if (title.hidden == false) {
-                currCategory = title.textContent;
-            } else if (category.hidden == false && catsub.hidden == false) {
-                currCategory = category.textContent + " (" + catsub.textContent + ")";
-            } else if (category.hidden == false) {
-                currCategory = category.textContent;
+            if (title?.hidden == false && subtitle?.hidden == false) {
+                currCategory = title?.innerText + " (" + subtitle?.innerText + ")";
+            } else if (title?.hidden == false) {
+                currCategory = title?.innerText;
+            } else if (category?.hidden == false && catsub?.hidden == false) {
+                currCategory = category?.innerText + " (" + catsub?.innerText + ")";
+            } else if (category?.hidden == false) {
+                currCategory = category?.innerText;
             }
             return currCategory;
-            // var meta0 = document.getElementsByClassName("sticky ytd-video-secondary-info-renderer")[0].getElementsByTagName('ytd-rich-metadata-renderer')[0].__data.data
-            // var meta1 = document.getElementsByClassName("sticky ytd-video-secondary-info-renderer")[0].getElementsByTagName('ytd-rich-metadata-renderer')[1].__data.data
-            // if (meta0.title && meta0.subtitle) {
-            // 	currCategory = meta0.title.simpleText + " (" + meta0.subtitle.simpleText + ")"
-            // } else if (meta0.title) {
-            // 	currCategory = meta0.title.simpleText
-            // } else if (meta1.title && meta1.subtitle) {
-            // 	currCategory = meta1.title.simpleText + " (" + meta1.subtitle.simpleText + ")"
-            // } else if (meta1.title) {
-            // 	currCategory = meta1.title.simpleText
-            // }
-            // return currCategory
-        }
-
-        //If the category is not visable make it
-        var videoID = window.location.href.substring(window.location.href.indexOf("v=") + 2, window.location.href.indexOf("v=") + 2 + 11);
-        if (lastAlbumVideoID !== videoID) {
-            lastAlbumVideoID = videoID;
         }
         //Return no album/last category
         return currCategory;
     };
     youtubeInfoHandler.cover = function () {
-        var videoID = window.location.href.substring(window.location.href.indexOf("v=") + 2, window.location.href.indexOf("v=") + 2 + 11);
+        var url = new URL(window.location.href).search;
+        var videoID = new URLSearchParams(url).get("v");
 
-        if (lastImgVideoID !== videoID && videoID !== "ttps://www." && videoID !== null) {
+        if (lastImgVideoID !== videoID && videoID) {
             lastImgVideoID = videoID;
-            var img = document.createElement("img");
-            img.setAttribute("src", "https://i.ytimg.com/vi/" + videoID + "/hqdefault.jpg?");
+            const strr = "https://i.ytimg.com/vi/";
+            var img = document.createElement("img"),
+                qual = "/maxresdefault.jpg?";
+            img.setAttribute("src", strr + videoID + qual);
             img.addEventListener("load", function () {
                 if (img.height > 90) {
-                    currIMG = "https://i.ytimg.com/vi/" + videoID + "/hqdefault.jpg?";
+                    currIMG = strr + videoID + qual;
                 } else {
-                    currIMG = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
+                    currIMG = strr + videoID + "/hqdefault.jpg?";
                 }
             });
             img.addEventListener("error", function () {
-                currIMG = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
+                if (img.src.includes("maxresdefault")) {
+                    qual = "/hqdefault.jpg?";
+                } else if (img.src.includes("hqdefault")) {
+                    qual = "/mqdefault.jpg?";
+                } else if (img.src.includes("mqdefault")) {
+                    qual = "/maxresdefault.jpg?";
+                    currIMG = strr + lastImgVideoID + qual;
+                }
+                currIMG = strr + videoID + qual;
+                img.setAttribute("src", strr + videoID + qual);
             });
         }
 
@@ -127,10 +142,10 @@ function setupNew() {
     };
     youtubeInfoHandler.rating = function () {
         //Check if thumbs button is active
-        if (document.getElementById("menu-container").getElementsByTagName("button")[0].getAttribute("aria-pressed") == "true") {
+        if (document.getElementById("menu-container").getElementsByTagName("button")[0]?.getAttribute("aria-pressed") == "true") {
             return 5;
         }
-        if (document.getElementById("menu-container").getElementsByTagName("button")[1].getAttribute("aria-pressed") == "true") {
+        if (document.getElementById("menu-container").getElementsByTagName("button")[1]?.getAttribute("aria-pressed") == "true") {
             return 1;
         }
         return 0;
@@ -139,14 +154,14 @@ function setupNew() {
         if (document.getElementsByClassName("html5-main-video")[0].loop == true) {
             return 2;
         }
-        if (document.getElementById("playlist-action-menu").children.length > 0) {
-            return document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class").includes("active") ? 1 : 0;
+        if (document.getElementById("playlist-action-menu").children?.length > 0) {
+            return document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class")?.includes("active") ? 1 : 0;
         }
         return 0;
     };
     youtubeInfoHandler.shuffle = function () {
         if (document.getElementById("playlist-action-menu").children.length > 0) {
-            return document.getElementById("playlist-action-menu").children[0].children[0].children[1].getAttribute("class").includes("active") ? 1 : 0;
+            return document.getElementById("playlist-action-menu").children[0].children[0].children[1].getAttribute("class")?.includes("active") ? 1 : 0;
         }
         return 0;
     };
@@ -157,7 +172,7 @@ function setupNew() {
     youtubeEventHandler.readyCheck = null;
 
     youtubeEventHandler.playpause = function () {
-        document.getElementsByClassName("ytp-play-button")[0].click();
+        document.getElementsByClassName("ytp-play-button")[0]?.click();
     };
     //@TODO implement tab handling
     youtubeEventHandler.next = function () {
@@ -167,13 +182,13 @@ function setupNew() {
             document
                 .getElementsByClassName("playlist-items")[0]
                 .children[Math.floor(Math.random() * document.getElementsByClassName("playlist-items")[0].children.length)].querySelector("#meta")
-                .click();
+                ?.click();
         } else {
             if (!document.getElementsByClassName("playlist-items")[0].lastChild.hasAttribute("selected")) {
-                document.getElementsByClassName("playlist-items")[0].querySelector("#playlist-items[selected]").nextSibling.querySelector("#meta").click();
+                document.getElementsByClassName("playlist-items")[0].querySelector("#playlist-items[selected]").nextSibling.querySelector("#meta")?.click();
             } else {
-                if (document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class").includes("active")) {
-                    document.getElementsByClassName("playlist-items")[0].children[0].querySelector("#meta").click();
+                if (document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class")?.includes("active")) {
+                    document.getElementsByClassName("playlist-items")[0].children[0].querySelector("#meta")?.click();
                 } else {
                     document.getElementsByClassName("ytp-next-button")[0].click();
                 }
@@ -181,7 +196,7 @@ function setupNew() {
         }
     };
     youtubeEventHandler.previous = function () {
-        if (document.getElementsByClassName("ytp-prev-button")[0].getAttribute("aria-disabled") == "false") {
+        if (document.getElementsByClassName("ytp-prev-button")[0]?.getAttribute("aria-disabled") == "false") {
             document.getElementsByClassName("ytp-prev-button")[0].click();
         } else {
             if (document.getElementsByClassName("html5-main-video")[0].currentTime <= 3) {
@@ -210,32 +225,32 @@ function setupNew() {
             //Each if is a different state, first is loop none, second is loop one, last is loop all order triggered is still the usual none->all->one
             if (document.getElementsByClassName("html5-main-video")[0].loop == true) {
                 document.getElementsByClassName("html5-main-video")[0].loop = false;
-                if (document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class").includes("active")) {
+                if (document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class")?.includes("active")) {
                     document.getElementById("playlist-action-menu").children[0].children[0].children[0].click();
                 }
-            } else if (document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class").includes("active")) {
+            } else if (document.getElementById("playlist-action-menu").children[0].children[0].children[0].getAttribute("class")?.includes("active")) {
                 document.getElementsByClassName("html5-main-video")[0].loop = true;
             } else {
-                document.getElementById("playlist-action-menu").children[0].children[0].children[0].click();
+                document.getElementById("playlist-action-menu").children[0].children[0].children[0]?.click();
             }
         }
     };
     youtubeEventHandler.shuffle = function () {
-        if (document.getElementById("playlist-actions") !== null) {
-            document.getElementById("playlist-action-menu").children[0].children[0].children[1].click();
+        if (document.getElementById("playlist-action-menu").children.length > 0) {
+            document.getElementById("playlist-action-menu").children[0].children[0].children[1]?.click();
         }
     };
     youtubeEventHandler.toggleThumbsUp = function () {
-        document.getElementById("menu-container").getElementsByTagName("button")[0].click();
+        document.getElementById("menu-container").getElementsByTagName("button")[0]?.click();
     };
     youtubeEventHandler.toggleThumbsDown = function () {
-        document.getElementById("menu-container").getElementsByTagName("button")[1].click();
+        document.getElementById("menu-container").getElementsByTagName("button")[1]?.click();
     };
     youtubeEventHandler.rating = function (rating) {
         if (rating > 3) {
-            document.getElementById("menu-container").getElementsByTagName("button")[0].click();
+            document.getElementById("menu-container").getElementsByTagName("button")[0]?.click();
         } else if (rating < 3) {
-            document.getElementById("menu-container").getElementsByTagName("button")[1].click();
+            document.getElementById("menu-container").getElementsByTagName("button")[1]?.click();
         }
     };
 }
