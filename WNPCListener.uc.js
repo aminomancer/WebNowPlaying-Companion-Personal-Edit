@@ -25,7 +25,6 @@ function wInit() {
     observer.observe(node, options);
 }
 
-Services.obs.addObserver(wInit, "browser-delayed-startup-finished");
 if (gBrowserInit.delayedStartupFinished) {
     wInit();
 } else {

@@ -6,6 +6,7 @@ var lastAlbumVideoID = "";
 var currIMG = "";
 var currCategory = "";
 var wasMadeVisable = false;
+var shuffleState = 0;
 
 function setupEmbedded() {
     var youtubeEmbeddedInfoHandler = createNewMusicInfo();
@@ -15,9 +16,10 @@ function setupEmbedded() {
     };
 
     youtubeEmbeddedInfoHandler.readyCheck = function () {
+        let title = document.getElementsByClassName("ytp-title-text");
         return (
-            document.getElementsByClassName("ytp-title-text").length > 0 &&
-            document.getElementsByClassName("ytp-title-text")[0].innerText.length > 0 &&
+            title.length > 0 &&
+            title[0].innerText.length > 0 &&
             (document.getElementsByClassName("html5-video-player")[0].classList.contains("unstarted-mode") ? false : true)
         );
     };
@@ -40,8 +42,9 @@ function setupEmbedded() {
         return document.getElementsByClassName("ytp-title-expanded-title")[0].innerText;
     };
     youtubeEmbeddedInfoHandler.album = function () {
-        if (document.getElementsByClassName("ytp-playlist-menu-title")[0]?.innerText.length > 0) {
-            return document.getElementsByClassName("ytp-playlist-menu-title")[0].innerText;
+        let playlist = document.getElementsByClassName("ytp-playlist-menu-title")[0];
+        if (playlist?.innerText.length > 0) {
+            return playlist.innerText;
         }
         return currCategory;
     };
@@ -64,13 +67,14 @@ function setupEmbedded() {
             img.addEventListener("error", function () {
                 if (img.src.includes("maxresdefault")) {
                     qual = "/hqdefault.jpg?";
+                    currIMG = strr + videoID + qual;
                 } else if (img.src.includes("hqdefault")) {
                     qual = "/mqdefault.jpg?";
+                    currIMG = strr + videoID + qual;
                 } else if (img.src.includes("mqdefault")) {
                     qual = "/maxresdefault.jpg?";
                     currIMG = strr + lastImgVideoID + qual;
                 }
-                currIMG = strr + videoID + qual;
                 img.setAttribute("src", strr + videoID + qual);
             });
         }
@@ -96,7 +100,7 @@ function setupEmbedded() {
         return 0;
     };
     youtubeEmbeddedInfoHandler.shuffle = function () {
-        return 0;
+        return shuffleState;
     };
 
     var youtubeEmbeddedEventHandler = createNewMusicEventHandler();
@@ -115,67 +119,63 @@ function setupEmbedded() {
     };
     //@TODO implement tab handling
     youtubeEmbeddedEventHandler.next = function () {
-        if (new URLSearchParams(document.getElementsByClassName("ytp-title-link")[0].search).get("list")) {
-            if (playlistClicked == false && document.getElementsByClassName("ytp-playlist-menu-items")[0].children?.length === 0) {
-                document.getElementsByClassName("ytp-playlist-menu-button")[0].click();
-                document.getElementsByClassName("ytp-playlist-menu-button")[0].click();
+        if (shuffleState && new URLSearchParams(document.getElementsByClassName("ytp-title-link")[0].search).get("list")) {
+            let playlist = document.getElementsByClassName("ytp-playlist-menu-items")[0];
+            if (!playlistClicked && playlist?.children.length === 0) {
+                let open = document.getElementsByClassName("ytp-playlist-menu-button")[0];
+                open.click();
+                open.click();
                 playlistClicked = true;
-            } else if (playlistClicked == true && document.getElementsByClassName("ytp-playlist-menu-items")[0].children?.length === 0) {
-                return;
             }
-            document
-                .getElementsByClassName("ytp-playlist-menu-items")[0]
-                .children[Math.floor(Math.random() * document.getElementsByClassName("ytp-playlist-menu-items")[0].children.length)].click();
+            playlist?.children[Math.floor(Math.random() * playlist?.children.length)].click();
         } else {
-            if (document.getElementsByClassName("ytp-next-button")[0]?.getAttribute("aria-disabled") !== "true") {
-                document.getElementsByClassName("ytp-next-button")[0].click();
+            let next = document.getElementsByClassName("ytp-next-button")[0];
+            if (next?.getAttribute("aria-disabled") !== "true") {
+                next.click();
             } else {
                 return;
             }
         }
     };
     youtubeEmbeddedEventHandler.previous = function () {
-        if (document.getElementsByClassName("ytp-prev-button")[0]?.getAttribute("aria-disabled") !== "true") {
-            if (document.getElementsByClassName("html5-main-video")[0].currentTime <= 3) {
-                document.getElementsByClassName("ytp-prev-button")[0].click();
-            } else {
-                document.getElementsByClassName("html5-main-video")[0].currentTime = 0;
-            }
-        } else if (new URLSearchParams(document.getElementsByClassName("ytp-title-link")[0].search).get("list")) {
-            if (document.getElementsByClassName("html5-main-video")[0].currentTime <= 3) {
-                if (playlistClicked == false && document.getElementsByClassName("ytp-playlist-menu-items")[0].children?.length === 0) {
-                    document.getElementsByClassName("ytp-playlist-menu-button")[0].click();
-                    document.getElementsByClassName("ytp-playlist-menu-button")[0].click();
+        let video = document.getElementsByClassName("html5-main-video")[0],
+            previous = document.getElementsByClassName("ytp-prev-button")[0];
+        if (shuffleState && new URLSearchParams(document.getElementsByClassName("ytp-title-link")[0].search).get("list")) {
+            if (video.currentTime <= 3) {
+                let playlist = document.getElementsByClassName("ytp-playlist-menu-items")[0];
+                if (!playlistClicked && playlist?.children.length === 0) {
+                    let open = document.getElementsByClassName("ytp-playlist-menu-button")[0];
+                    open.click();
+                    open.click();
                     playlistClicked = true;
-                } else if (playlistClicked == true && document.getElementsByClassName("ytp-playlist-menu-items")[0].children?.length === 0) {
-                    return;
                 }
-                document
-                    .getElementsByClassName("ytp-playlist-menu-items")[0]
-                    .children[Math.floor(Math.random() * document.getElementsByClassName("ytp-playlist-menu-items")[0].children.length)].click();
+                playlist?.children[Math.floor(Math.random() * playlist?.children.length)].click();
             } else {
-                document.getElementsByClassName("html5-main-video")[0].currentTime = 0;
+                video.currentTime = 0;
             }
+        } else if (previous?.getAttribute("aria-disabled") !== "true" && video.currentTime <= 3) {
+            previous.click();
         } else {
-            document.getElementsByClassName("html5-main-video")[0].currentTime = 0;
+            video.currentTime = 0;
         }
     };
     youtubeEmbeddedEventHandler.progressSeconds = function (position) {
         document.getElementsByClassName("html5-main-video")[0].currentTime = position;
     };
     youtubeEmbeddedEventHandler.volume = function (volume) {
-        if (document.getElementsByClassName("html5-main-video")[0].muted && volume > 0) {
-            document.getElementsByClassName("html5-main-video")[0].muted = false;
+        let video = document.getElementsByClassName("html5-main-video")[0];
+        if (video.muted && volume > 0) {
+            video.muted = false;
         } else if (volume == 0) {
-            document.getElementsByClassName("html5-main-video")[0].muted = true;
+            video.muted = true;
         }
-        document.getElementsByClassName("html5-main-video")[0].volume = volume;
+        video.volume = volume;
     };
     youtubeEmbeddedEventHandler.repeat = function () {
         document.getElementsByClassName("html5-main-video")[0].loop = !document.getElementsByClassName("html5-main-video")[0].loop;
     };
     youtubeEmbeddedEventHandler.shuffle = function () {
-        return;
+        shuffleState = shuffleState ? 0 : 1;
     };
     youtubeEmbeddedEventHandler.toggleThumbsUp = function () {
         return;
