@@ -175,7 +175,9 @@ function setupEmbedded() {
         document.getElementsByClassName("html5-main-video")[0].loop = !document.getElementsByClassName("html5-main-video")[0].loop;
     };
     youtubeEmbeddedEventHandler.shuffle = function () {
-        shuffleState = shuffleState ? 0 : 1;
+        new URLSearchParams(document.getElementsByClassName("ytp-title-link")[0].search).get("list")
+            ? (shuffleState = shuffleState ? 0 : 1)
+            : (shuffleState = 0);
     };
     youtubeEmbeddedEventHandler.toggleThumbsUp = function () {
         return;
