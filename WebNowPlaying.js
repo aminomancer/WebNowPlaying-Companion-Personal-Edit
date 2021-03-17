@@ -233,7 +233,7 @@ function updateInfo()
 				temp = musicInfo.cover();
 				if (currCover !== temp && temp !== null)
 				{
-					ws.send("COVER:" + temp);
+					ws.send("COVER:" + temp.replace("https://", "http://"));
 					currCover = temp;
 				}
 			}
