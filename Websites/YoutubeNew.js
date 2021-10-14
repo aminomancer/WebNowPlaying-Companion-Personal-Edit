@@ -40,7 +40,7 @@ function checkTopLevelButton(menu, i) {
     return topLevelButtons.children[i]?.classList.contains("style-default-active");
 }
 
-function setupNew() {
+function setup() {
     var youtubeInfoHandler = createNewMusicInfo();
 
     youtubeInfoHandler.player = function () {
@@ -187,12 +187,12 @@ function setupNew() {
     };
     youtubeInfoHandler.repeat = function () {
         if (document.getElementsByClassName("html5-main-video")[0].loop) return 2;
-        let menu = document.getElementById("playlist-action-menu");
+        let menu = document.querySelector("#content #playlist-action-menu");
         if (menu.children?.length > 0) return checkTopLevelButton(menu, 0) ? 1 : 0;
         return 0;
     };
     youtubeInfoHandler.shuffle = function () {
-        let menu = document.getElementById("playlist-action-menu");
+        let menu = document.querySelector("#content #playlist-action-menu");
         if (menu.children.length > 0) {
             return checkTopLevelButton(menu, 1) ? 1 : 0;
         }
@@ -222,7 +222,7 @@ function setupNew() {
                 .querySelector("#playlist-items[selected]")
                 ?.nextSibling?.querySelector("#meta")
                 ?.click();
-        else if (checkTopLevelButton(document.getElementById("playlist-action-menu"), 0))
+        else if (checkTopLevelButton(document.querySelector("#content #playlist-action-menu"), 0))
             playlist.firstElementChild.querySelector("#meta").click();
         else next.click();
     };
@@ -243,7 +243,7 @@ function setupNew() {
     };
     youtubeEventHandler.repeat = function () {
         let video = document.getElementsByClassName("html5-main-video")[0];
-        let menu = document.getElementById("playlist-action-menu");
+        let menu = document.querySelector("#content #playlist-action-menu");
         //If no repeat button on the page then use video's loop element to loop the video
         if (
             !document.getElementById("playlist")?.hasAttribute("has-playlist-buttons") ||
@@ -260,7 +260,7 @@ function setupNew() {
         }
     };
     youtubeEventHandler.shuffle = function () {
-        let menu = document.getElementById("playlist-action-menu");
+        let menu = document.querySelector("#content #playlist-action-menu");
         if (menu?.children.length > 0) clickTopLevelButton(menu, 1);
     };
     youtubeEventHandler.toggleThumbsUp = function () {
