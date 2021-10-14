@@ -40,6 +40,15 @@ function checkTopLevelButton(menu, i) {
     return topLevelButtons.children[i]?.classList.contains("style-default-active");
 }
 
+function isMiniPlayerActive() {
+    return document.querySelector("ytd-miniplayer").active;
+}
+
+function getContainer() {
+    let string = isMiniPlayerActive() ? "ytd-miniplayer" : "body > ytd-app > #content";
+    return document.querySelector(string);
+}
+
 function setup() {
     var youtubeInfoHandler = createNewMusicInfo();
 
@@ -53,20 +62,16 @@ function setup() {
     };
 
     youtubeInfoHandler.state = function () {
-        let video = document.getElementsByClassName("html5-main-video")[0];
+        let video = document.querySelector(".html5-main-video");
         let state = video.paused ? 2 : 1;
-        if (
-            document.getElementsByClassName("ytp-play-button")[0]?.getAttribute("aria-label") ===
-            null
-        )
+        if (getContainer().querySelector(".ytp-play-button")?.getAttribute("aria-label") === null)
             state = 3;
         //It is possible for the video to be "playing" but not started
         if (state == 1 && video.played.length <= 0) state = 2;
         return state;
     };
     youtubeInfoHandler.title = function () {
-        return document.getElementsByClassName("ytd-video-primary-info-renderer title")[0]
-            ?.innerText;
+        return document.querySelector(".ytd-video-primary-info-renderer.title")?.innerText;
     };
     youtubeInfoHandler.artist = function () {
         return document.querySelector("#upload-info yt-formatted-string.ytd-channel-name")
@@ -74,7 +79,7 @@ function setup() {
     };
     youtubeInfoHandler.album = function () {
         //If using a playlist just use the title of that
-        let playlist = document.getElementsByClassName("ytd-playlist-panel-renderer title")[0];
+        let playlist = getContainer().querySelector(".ytd-playlist-panel-renderer.title");
         if (playlist?.innerText !== "") return playlist.innerText;
 
         //If video has a "Buy or Rent" module use the displayed title & year
@@ -108,19 +113,16 @@ function setup() {
         }
 
         //If playing a video with a hashtag use that
-        if (document.getElementsByClassName("super-title")[0]?.children.length > 0) {
-            return document.getElementsByClassName("super-title")[0].children[0].innerText;
-        }
+        if (document.querySelector(".super-title")?.children.length > 0)
+            return document.querySelector(".super-title").children[0].innerText;
 
         //Check if the secondary info has a category and is visible
-        let info2nd = document.getElementsByClassName(
-            "sticky ytd-video-secondary-info-renderer"
-        )[0];
+        let info2nd = document.querySelector(".sticky.ytd-video-secondary-info-renderer");
         if (info2nd?.innerText.length > 0 && info2nd.children[0]?.children.length > 0) {
             //Return category if visible else
             try {
-                let titles = info2nd?.querySelectorAll("#title"),
-                    subtitles = info2nd?.querySelectorAll("#subtitle");
+                let titles = info2nd?.querySelectorAll("#title");
+                let subtitles = info2nd?.querySelectorAll("#subtitle");
                 if (titles[0]?.hidden == false && subtitles[0]?.hidden == false)
                     currCategory = `${titles[0]?.innerText} (${subtitles[0]?.innerText})`;
                 else if (titles[0]?.hidden == false) currCategory = titles[0]?.innerText;
@@ -168,15 +170,17 @@ function setup() {
     };
     youtubeInfoHandler.durationString = function () {
         return (
-            document.getElementsByClassName("ytp-time-duration")[0]?.innerText ||
-            fancyTimeFormat(document.getElementsByClassName("html5-main-video")[0])
+            document.querySelector(
+                (isMiniPlayerActive() ? ".ytp-miniplayer-ui" : ".ytp-left-controls") +
+                    " .ytp-time-duration"
+            )?.innerText || fancyTimeFormat(document.querySelector(".html5-main-video"))
         );
     };
     youtubeInfoHandler.position = function () {
-        return document.getElementsByClassName("html5-main-video")[0].currentTime;
+        return document.querySelector(".html5-main-video").currentTime;
     };
     youtubeInfoHandler.volume = function () {
-        return document.getElementsByClassName("html5-main-video")[0].volume;
+        return document.querySelector(".html5-main-video").volume;
     };
     youtubeInfoHandler.rating = function () {
         let menu = document.getElementById("menu-container");
@@ -186,13 +190,13 @@ function setup() {
         return 0;
     };
     youtubeInfoHandler.repeat = function () {
-        if (document.getElementsByClassName("html5-main-video")[0].loop) return 2;
-        let menu = document.querySelector("#content #playlist-action-menu");
+        if (document.querySelector(".html5-main-video").loop) return 2;
+        let menu = getContainer().querySelector("#playlist-action-menu");
         if (menu.children?.length > 0) return checkTopLevelButton(menu, 0) ? 1 : 0;
         return 0;
     };
     youtubeInfoHandler.shuffle = function () {
-        let menu = document.querySelector("#content #playlist-action-menu");
+        let menu = getContainer().querySelector("#playlist-action-menu");
         if (menu.children.length > 0) {
             return checkTopLevelButton(menu, 1) ? 1 : 0;
         }
@@ -205,13 +209,13 @@ function setup() {
     youtubeEventHandler.readyCheck = null;
 
     youtubeEventHandler.playpause = function () {
-        document.getElementsByClassName("ytp-play-button")[0]?.click();
+        getContainer().querySelector(".ytp-play-button")?.click();
     };
 
     youtubeEventHandler.next = function () {
-        let next = document.getElementsByClassName("ytp-next-button")[0],
-            playlist = document.getElementsByClassName("playlist-items")[0];
-        if (!document.getElementById("playlist")?.hasAttribute("has-playlist-buttons"))
+        let next = getContainer().querySelector(".ytp-next-button");
+        let playlist = getContainer().querySelector(".playlist-items");
+        if (!getContainer().querySelector("#playlist")?.hasAttribute("has-playlist-buttons"))
             next.click();
         else if (currShuffle == 1)
             playlist.children[Math.floor(Math.random() * playlist.children.length)]
@@ -222,31 +226,32 @@ function setup() {
                 .querySelector("#playlist-items[selected]")
                 ?.nextSibling?.querySelector("#meta")
                 ?.click();
-        else if (checkTopLevelButton(document.querySelector("#content #playlist-action-menu"), 0))
+        else if (checkTopLevelButton(getContainer().querySelector("#playlist-action-menu"), 0))
             playlist.firstElementChild.querySelector("#meta").click();
         else next.click();
     };
     youtubeEventHandler.previous = function () {
-        let video = document.getElementsByClassName("html5-main-video")[0],
-            previous = document.getElementsByClassName("ytp-prev-button")[0];
-        if (previous?.getAttribute("aria-disabled") == "false") previous.click();
+        let video = document.querySelector(".html5-main-video");
+        let previous = getContainer().querySelector(".ytp-prev-button");
+        if (isMiniPlayerActive()) previous.click();
+        else if (previous?.getAttribute("aria-disabled") == "false") previous.click();
         else if (video.currentTime <= 3) history.back();
         else video.currentTime = 0;
     };
     youtubeEventHandler.progressSeconds = function (position) {
-        document.getElementsByClassName("html5-main-video")[0].currentTime = position;
+        document.querySelector(".html5-main-video").currentTime = position;
     };
     youtubeEventHandler.volume = function (volume) {
-        let video = document.getElementsByClassName("html5-main-video")[0];
+        let video = document.querySelector(".html5-main-video");
         video.muted = volume == 0;
         video.volume = volume;
     };
     youtubeEventHandler.repeat = function () {
-        let video = document.getElementsByClassName("html5-main-video")[0];
-        let menu = document.querySelector("#content #playlist-action-menu");
+        let video = document.querySelector(".html5-main-video");
+        let menu = getContainer().querySelector("#playlist-action-menu");
         //If no repeat button on the page then use video's loop element to loop the video
         if (
-            !document.getElementById("playlist")?.hasAttribute("has-playlist-buttons") ||
+            !getContainer().querySelector("#playlist")?.hasAttribute("has-playlist-buttons") ||
             !menu.children.length
         )
             video.loop = !video.loop;
@@ -260,7 +265,7 @@ function setup() {
         }
     };
     youtubeEventHandler.shuffle = function () {
-        let menu = document.querySelector("#content #playlist-action-menu");
+        let menu = getContainer().querySelector("#playlist-action-menu");
         if (menu?.children.length > 0) clickTopLevelButton(menu, 1);
     };
     youtubeEventHandler.toggleThumbsUp = function () {
