@@ -24,7 +24,8 @@ function fancyTimeFormat(dur) {
     return ret;
 }
 
-// click thumbs up, thumbs down, share, or save = pass 0, 1, 2, 3
+// click a menu button i.e. thumbs up/down, loop, shuffle.
+// menu narrows the check, i is the DOM index of the desired button
 function clickTopLevelButton(menu, i) {
     let topLevelButtons = menu.querySelector("#top-level-buttons");
     if (!topLevelButtons || topLevelButtons.hidden)
@@ -32,7 +33,8 @@ function clickTopLevelButton(menu, i) {
     topLevelButtons.children[i]?.click();
 }
 
-// check thumbs up, thumbs down, share, or save = pass 0, 1, 2, 3
+// check active state for a menu button i.e. thumbs up/down, loop, shuffle.
+// menu narrows the check, i is the DOM index of the desired button
 function checkTopLevelButton(menu, i) {
     let topLevelButtons = menu.querySelector("#top-level-buttons");
     if (!topLevelButtons || topLevelButtons.hidden)
@@ -221,7 +223,11 @@ function setup() {
             playlist.children[Math.floor(Math.random() * playlist.children.length)]
                 .querySelector("#meta")
                 ?.click();
-        else if (!playlist.lastElementChild?.hasAttribute("selected"))
+        else if (
+            !playlist
+                .querySelector("ytd-playlist-panel-video-renderer:last-of-type")
+                .hasAttribute("selected")
+        )
             playlist
                 .querySelector("#playlist-items[selected]")
                 ?.nextSibling?.querySelector("#meta")
