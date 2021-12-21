@@ -1,9 +1,8 @@
-//Adds support for Netflix
+//doesn't work. webextension permission issues sigh
 /*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
 
 function getContext() {
-    return document.querySelector("#appMountPoint")?._reactRootContainer?._internalRoot?.current
-        ?.child?.memoizedProps?.children?.props?.appContext;
+    return window.wrappedJSObject.netflix.appContext;
 }
 
 function findReact(dom) {
@@ -119,6 +118,8 @@ function setup() {
         if (userRating === 2) return 5;
         else return userRating;
     };
+    netflixInfoHandler.repeat = null;
+    netflixInfoHandler.shuffle = null;
 
     var netflixEventHandler = createNewMusicEventHandler();
     netflixEventHandler.readyCheck = function () {
@@ -126,39 +127,31 @@ function setup() {
         return player && player.isReady() && player.getDuration() > 0;
     };
     netflixEventHandler.playpause = function () {
-        let { player } = getPlayer();
+        let player = getPlayer();
         player.getPaused() ? player.play() : player.pause();
     };
-    // netflixEventHandler.next = function () {
-    //     getPlayer().playNextEpisode();
-    //     // doesn't work for some reason
-    // };
-    // netflixEventHandler.previous = function () {
-    //     let data = getSeasonData();
-    //     if (data) {
-    //         let { episodes, seq } = data.season;
-    //         let eIndex = episodes.findIndex((episode) => episode.id === data.episode.id);
-    //         let newId;
-    //         if (eIndex > 0) newId = episodes[eIndex - 1].id;
-    //         else if (seq > 1) {
-    //             let prevEpisodes = data.seasons[seq - 2].episodes;
-    //             newId = prevEpisodes[prevEpisodes.length - 1]?.id;
-    //         }
-    //         return newId;
-    //         let sessionId = Object.values(getContext()?.state.playerApp.getState().playerApp.sessionDataBySessionId).find(data => "sessionId" in data).sessionId;
-    //     }
-    // };
-    // netflixEventHandler.progressSeconds = function (position) {
-    //     document.getElementsByTagName("audio")[0].currentTime = position;
-    // };
-    // netflixEventHandler.volume = function (volume) {
-    //     if (document.getElementsByTagName("audio")[0].muted && volume > 0) {
-    //         document.getElementsByTagName("audio")[0].muted = false;
-    //     } else if (volume == 0) {
-    //         document.getElementsByTagName("audio")[0].muted = true;
-    //     }
-    //     document.getElementsByTagName("audio")[0].volume = volume;
-    // };
+    netflixEventHandler.next = function () {
+        let player = getPlayer();
+        player.seek(player.getDuration());
+    };
+    netflixEventHandler.previous = function () {
+        let player = getPlayer();
+        player.seek(0);
+    };
+    netflixEventHandler.progressSeconds = function (position) {
+        let player = getPlayer();
+        player.seek(position);
+        // player.seek(player.getCurrentTime() + position);
+    };
+    netflixEventHandler.volume = function (volume) {
+        let player = getPlayer();
+        player.setVolume(volume);
+    };
+    netflixEventHandler.repeat = null;
+    netflixEventHandler.shuffle = null;
+    netflixEventHandler.toggleThumbsUp = null;
+    netflixEventHandler.toggleThumbsDown = null;
+    netflixEventHandler.rating = null;
 }
 
 setup();
