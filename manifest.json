@@ -4,7 +4,7 @@
     "name": "WebNowPlaying Companion - Personal Edit",
     "short_name": "WebNowPlayingPersonal",
     "description": "WebNowPlaying Companion with a variety of modifications, fixes, and updates. Especially a lot of feature improvements and optimizations for YouTube.",
-    "version": "0.9.3",
+    "version": "0.9.4",
     "applications": {
         "gecko": {
             "id": "WNPC@aminomancer",
@@ -128,6 +128,11 @@
             "js": ["WebNowPlaying.js", "Websites/Qobuz.js"]
         },
         {
+            "matches": ["*://*/*"],
+            "include_globs": ["*://www.netflix.com/*"],
+            "js": ["WebNowPlaying.js", "Websites/Netflix.js"]
+        },
+        {
             "matches": ["<all_urls>"],
             "exclude_globs": [
                 "*://music.yandex.*/*",
@@ -146,7 +151,8 @@
                 "*://jetsetradio.live/*",
                 "*://player.fm/*",
                 "*://www.twitch.tv/*",
-                "*://music.apple.com/*"
+                "*://music.apple.com/*",
+                "*://www.netflix.com/*"
             ],
             "js": ["WebNowPlaying.js", "Websites/Generic.js"]
         }
