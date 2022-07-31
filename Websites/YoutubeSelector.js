@@ -2,11 +2,11 @@
 /*global init setupNew setupOld setupTV*/
 
 if (document.location.href.includes("/tv#/")) {
-    setupTV();
-    init();
+  setupTV();
+  init();
 } else {
-    setup();
-    init();
+  setup();
+  init();
 }
 
 //chrome.runtime.sendMessage(
