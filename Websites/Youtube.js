@@ -374,11 +374,8 @@ function setup() {
   youtubeEventHandler.repeat = function () {
     let video = document.querySelector(".html5-main-video");
     let menu = findContainerElement("#playlist-action-menu");
-    let hasPlaylistButtons =
-      findContainerElement("#playlist")?.wrappedJSObject?.get("hasPlaylistButtons");
-    if (hasPlaylistButtons && menu.children.length > 0) {
-      XPCNativeWrapper(hasPlaylistButtons);
-      let state = checkTopLevelButton(menu, { query: "playlistLoopStateEntity" });
+    let state = checkTopLevelButton(menu, { query: "playlistLoopStateEntity" });
+    if (menu.children.length > 0 && state != null) {
       let click = () => clickTopLevelButton(menu, { query: "playlistLoopStateEntity" });
       // If the new repeat button is enabled, use that. It allows cycling
       // between no loop, loop playlist, and loop one (single video).
