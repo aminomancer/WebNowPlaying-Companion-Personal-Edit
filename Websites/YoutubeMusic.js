@@ -1,11 +1,11 @@
 //Adds support for Youtube Music
 /*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString*/
 
-var lastImgVideoID = "";
-var currIMG = "";
-
 function setup() {
-  var ymInfoHandler = createNewMusicInfo();
+  let lastImgVideoID = "";
+  let currImg = "";
+
+  let ymInfoHandler = createNewMusicInfo();
 
   ymInfoHandler.player = function () {
     return "YouTube Music";
@@ -44,7 +44,7 @@ function setup() {
     //If queue has a name use that
     //else if (document.getElementsByClassName("queue-title ytmusic-player-page")[0].children.length > 0)
     //{
-    //	var temp = document.getElementsByClassName("queue-title ytmusic-player-page")[0].children[0].innerText;
+    //	let temp = document.getElementsByClassName("queue-title ytmusic-player-page")[0].children[0].innerText;
     //	//Trim "Album - " from the beginning of the string if it exists
     //	if (temp.indexOf("Album - ") == 0)
     //	{
@@ -56,38 +56,38 @@ function setup() {
     return "";
   };
   ymInfoHandler.cover = function () {
-    var videoID = document.getElementsByClassName("ytp-title")[0].children[1].children[0].href;
+    let videoID = document.getElementsByClassName("ytp-title")[0].children[1].children[0].href;
     videoID = videoID.substring(videoID.lastIndexOf("=") + 1);
-    var cover = document.getElementsByClassName("image ytmusic-player-bar")[0].src;
+    let cover = document.getElementsByClassName("image ytmusic-player-bar")[0].src;
 
     //Check if cover is from youtube if it is some work need done first
     if (cover.includes("ytimg")) {
       if (lastImgVideoID !== videoID && videoID !== "ttps://www.") {
         lastImgVideoID = videoID;
-        var img = document.createElement("img");
+        let img = document.createElement("img");
         img.setAttribute("src", "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?");
         img.addEventListener("load", function () {
           if (img.height > 90) {
-            currIMG = "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?";
+            currImg = "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?";
           } else {
-            currIMG = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
+            currImg = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
           }
         });
         img.addEventListener("error", function () {
-          currIMG = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
+          currImg = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
         });
       }
-      return currIMG;
+      return currImg;
     }
     cover = cover.substring(0, cover.lastIndexOf("="));
     return cover;
   };
   ymInfoHandler.durationString = function () {
-    var durTemp = document.getElementsByClassName("time-info ytmusic-player-bar")[0].innerText;
+    let durTemp = document.getElementsByClassName("time-info ytmusic-player-bar")[0].innerText;
     return durTemp.substring(durTemp.indexOf(" / ") + " / ".length);
   };
   ymInfoHandler.positionString = function () {
-    var posTemp = document.getElementsByClassName("time-info ytmusic-player-bar")[0].innerText;
+    let posTemp = document.getElementsByClassName("time-info ytmusic-player-bar")[0].innerText;
     return posTemp.substring(0, posTemp.indexOf(" / "));
   };
   ymInfoHandler.volume = function () {
@@ -133,7 +133,7 @@ function setup() {
     return 0;
   };
 
-  var ymEventHandler = createNewMusicEventHandler();
+  let ymEventHandler = createNewMusicEventHandler();
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
   ymEventHandler.readyCheck = function () {
@@ -156,13 +156,13 @@ function setup() {
     document.getElementsByClassName("previous-button")[0].click();
   };
   ymEventHandler.progress = function (progress) {
-    var loc = document
+    let loc = document
       .getElementById("progress-bar")
       .children[0].children[0].children[0].getBoundingClientRect();
     progress *= loc.width;
 
-    var a = document.getElementById("progress-bar").children[0].children[0].children[0];
-    var e = document.createEvent("MouseEvents");
+    let a = document.getElementById("progress-bar").children[0].children[0].children[0];
+    let e = document.createEvent("MouseEvents");
     e.initMouseEvent(
       "mousedown",
       true,

@@ -1,164 +1,144 @@
-// Adds support for the new youtube layout
+// Adds support for YouTube
 /*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
 
-var lastImgVideoID = "";
-var lastAlbumVideoID = "";
-var currImg = "";
-var currCategory = "";
-var wasMadeVisable = false;
-
-// A fallback in case the video's time display isn't working.
-function fancyTimeFormat(dur) {
-  // Hours, minutes and seconds
-  let days = ~~(dur / 86400);
-  let hrs = ~~((dur % 86400) / 3600);
-  let mins = ~~((dur % 3600) / 60);
-  let secs = ~~dur % 60;
-
-  // Output like "1:01" or "4:03:59" or "123:03:59"
-  let ret = "";
-  if (days > 0) ret += "" + days + ":" + (hrs < 10 ? "0" : "");
-  if (hrs > 0) ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
-  if (mins > 0) ret += "" + mins + ":" + (secs < 10 ? "0" : "");
-  else ret += "" + 0 + ":";
-  ret += "" + secs;
-  return ret;
-}
-
-function isMiniPlayerActive() {
-  return document.querySelector("ytd-miniplayer").active;
-}
-
-// There's a main container and a miniplayer container. We usually want to
-// search for elements in whichever one is active, so use this instead of
-// document wherever possible.
-function getContainer() {
-  let selector = isMiniPlayerActive() ? "ytd-miniplayer" : "body > ytd-app > #content";
-  return document.querySelector(selector);
-}
-
-/**
- * There's a main container and a miniplayer container. We usually want to
- * search for elements in whichever one is active, so use this instead of
- * document.querySelector(selector) wherever possible.
- * @param {String} selector A CSS selector string
- * @returns {DOMNode|undefined} Just like document.querySelector
- */
-function findContainerElement(selector) {
-  return getContainer().querySelector(selector) || document.querySelector(selector);
-}
-
-// Synchronously retrieve info about the video without parsing DOM.
-function getVideoDetails() {
-  let app = document
-    .querySelector("ytd-app")
-    .wrappedJSObject?.get("data.playerResponse.videoDetails");
-  XPCNativeWrapper(app);
-  return app ?? {};
-}
-
-// Synchronously retrieve info about the playlist without parsing DOM.
-function getPlaylistDetails() {
-  let playlist = getContainer().querySelector("#playlist").wrappedJSObject?.get("data");
-  XPCNativeWrapper(playlist);
-  return playlist ?? {};
-}
-
-/**
- * Click a menu button, i.e. thumbs up/down, loop, shuffle. Must be a button
- * contained in #top-level-buttons or #top-level-buttons-computed.
- * @param {DOMNode} menu The container to search for the button in. Should be
- *   the parent of a ytd-menu-renderer element.
- * @param {String} query A data property to search for. This is basically a
- *   selector for a JS property instead of for an HTML attribute. It's needed
- *   because the buttons don't have any identifying HTML attributes. We'd be
- *   forced to just target them by child index otherwise, but such indices
- *   aren't consistent. An example is "data.targetId" which you can see inside
- *   the top level button in the console at button.__data.data.targetId
- * @param {*} [val] The value the data property specified by query should have.
- *   This is optional. If omitted, we'll accept the button regardless of the
- *   property value, as long as it has the property. This is usually a string.
- *   An example matching the above query parameter is "watch-like"
- */
-function clickTopLevelButton(menu, { query, val } = {}) {
-  if (!menu || !query) return false;
-  let buttons = menu.querySelector("#top-level-buttons");
-  if (!buttons || buttons.hidden) buttons = menu.querySelector("#top-level-buttons-computed");
-  if (!buttons) return;
-
-  buttons = [...buttons.children];
-  let button = buttons.find(btn => {
-    let found = btn.wrappedJSObject?.get(query);
-    XPCNativeWrapper(found);
-    if (val) return found === val;
-    else return !!found;
-  });
-  if (!button) return;
-
-  let innerButton = button.wrappedJSObject?.get("button");
-  XPCNativeWrapper(innerButton);
-  if (typeof innerButton === "object") innerButton.click();
-  else button.click();
-}
-
-/**
- * Check a menu button's active state. Must be a button contained in
- * #top-level-buttons or #top-level-buttons-computed.
- * @param {DOMNode} menu The container to search for the button in. Should be
- *   the parent of a ytd-menu-renderer element.
- * @param {String} query A data property to search for. This is basically a
- *   selector for a JS property instead of for an HTML attribute. It's needed
- *   because the buttons don't have any identifying HTML attributes. We'd be
- *   forced to just target them by child index otherwise, but such indices
- *   aren't consistent. An example is "data.targetId" which you can see inside
- *   the top level button in the console at button.__data.data.targetId
- * @param {*} [val] The value the data property specified by query should have.
- *   This is optional. If omitted, we'll accept the button regardless of the
- *   property value, as long as it has the property. This is usually a string.
- *   An example matching the above query parameter is "watch-like"
- * @returns {Boolean|Number|null} If the button is a toggle button, return true
- *   if the button is toggled on. If it's a cycle button like the repeat/loop
- *   button, return an integer representing the index of the button's current
- *   state relative to its possible states. These states match the Rainmeter
- *   plugin's repeat states: 0 is loop off, 1 is loop all, 2 is loop one.
- *   Finally, if this method doesn't support the button passed, return null.
- */
-function checkTopLevelButton(menu, { query, val } = {}) {
-  if (!menu || !query) return null;
-  let buttons = menu.querySelector("#top-level-buttons");
-  if (!buttons || buttons.hidden) buttons = menu.querySelector("#top-level-buttons-computed");
-  if (!buttons) return null;
-
-  buttons = [...buttons.children];
-  let button = buttons.find(btn => {
-    let found = btn.wrappedJSObject?.get(query);
-    XPCNativeWrapper(found);
-    if (val) return found === val;
-    else return !!found;
-  });
-  if (!button) return null;
-
-  let data = button.wrappedJSObject?.get("data");
-  XPCNativeWrapper(data);
-  if (data && data.states) {
-    let states = [...data.states]?.map(state => {
-      for (let prop in state) {
-        if (typeof state[prop] === "object" && "state" in state[prop]) return state[prop].state;
-      }
-    });
-    if (states) {
-      // loop states = ["PLAYLIST_LOOP_STATE_NONE", "PLAYLIST_LOOP_STATE_ALL", "PLAYLIST_LOOP_STATE_ONE"];
-      let currentState = button.wrappedJSObject?.get("currentState");
-      XPCNativeWrapper(currentState);
-      if (currentState) return Math.max(states.indexOf(currentState), 0);
-    }
+function setup() {
+  function isMiniPlayerActive() {
+    return document.querySelector("ytd-miniplayer").active;
   }
 
-  return button.classList.contains("style-default-active");
-}
+  // There's a main container and a miniplayer container. We usually want to
+  // search for elements in whichever one is active, so use this instead of
+  // document wherever possible.
+  function getContainer() {
+    let selector = isMiniPlayerActive() ? "ytd-miniplayer" : "body > ytd-app > #content";
+    return document.querySelector(selector);
+  }
 
-function setup() {
-  var youtubeInfoHandler = createNewMusicInfo();
+  /**
+   * There's a main container and a miniplayer container. We usually want to
+   * search for elements in whichever one is active, so use this instead of
+   * document.querySelector(selector) wherever possible.
+   * @param {String} selector A CSS selector string
+   * @returns {DOMNode|undefined} Just like document.querySelector
+   */
+  function findContainerElement(selector) {
+    return getContainer().querySelector(selector) || document.querySelector(selector);
+  }
+
+  // Synchronously retrieve info about the video without parsing DOM.
+  function getVideoDetails() {
+    let app = document
+      .querySelector("ytd-app")
+      .wrappedJSObject?.get("data.playerResponse.videoDetails");
+    XPCNativeWrapper(app);
+    return app ?? {};
+  }
+
+  // Synchronously retrieve info about the playlist without parsing DOM.
+  function getPlaylistDetails() {
+    let playlist = getContainer().querySelector("#playlist").wrappedJSObject?.get("data");
+    XPCNativeWrapper(playlist);
+    return playlist ?? {};
+  }
+
+  /**
+   * Click a menu button, i.e. thumbs up/down, loop, shuffle. Must be a button
+   * contained in #top-level-buttons or #top-level-buttons-computed.
+   * @param {DOMNode} menu The container to search for the button in. Should be
+   *   the parent of a ytd-menu-renderer element.
+   * @param {String} query A data property to search for. This is basically a
+   *   selector for a JS property instead of for an HTML attribute. It's needed
+   *   because the buttons don't have any identifying HTML attributes. We'd be
+   *   forced to just target them by child index otherwise, but such indices
+   *   aren't consistent. An example is "data.targetId" which you can see inside
+   *   the top level button in the console at button.__data.data.targetId
+   * @param {*} [val] The value the data property specified by query should have.
+   *   This is optional. If omitted, we'll accept the button regardless of the
+   *   property value, as long as it has the property. This is usually a string.
+   *   An example matching the above query parameter is "watch-like"
+   */
+  function clickTopLevelButton(menu, { query, val } = {}) {
+    if (!menu || !query) return false;
+    let buttons = menu.querySelector("#top-level-buttons");
+    if (!buttons || buttons.hidden) buttons = menu.querySelector("#top-level-buttons-computed");
+    if (!buttons) return;
+
+    buttons = [...buttons.children];
+    let button = buttons.find(btn => {
+      let found = btn.wrappedJSObject?.get(query);
+      XPCNativeWrapper(found);
+      if (val) return found === val;
+      else return !!found;
+    });
+    if (!button) return;
+
+    let innerButton = button.wrappedJSObject?.get("button");
+    XPCNativeWrapper(innerButton);
+    if (typeof innerButton === "object") innerButton.click();
+    else button.click();
+  }
+
+  /**
+   * Check a menu button's active state. Must be a button contained in
+   * #top-level-buttons or #top-level-buttons-computed.
+   * @param {DOMNode} menu The container to search for the button in. Should be
+   *   the parent of a ytd-menu-renderer element.
+   * @param {String} query A data property to search for. This is basically a
+   *   selector for a JS property instead of for an HTML attribute. It's needed
+   *   because the buttons don't have any identifying HTML attributes. We'd be
+   *   forced to just target them by child index otherwise, but such indices
+   *   aren't consistent. An example is "data.targetId" which you can see inside
+   *   the top level button in the console at button.__data.data.targetId
+   * @param {*} [val] The value the data property specified by query should have.
+   *   This is optional. If omitted, we'll accept the button regardless of the
+   *   property value, as long as it has the property. This is usually a string.
+   *   An example matching the above query parameter is "watch-like"
+   * @returns {Boolean|Number|null} If the button is a toggle button, return true
+   *   if the button is toggled on. If it's a cycle button like the repeat/loop
+   *   button, return an integer representing the index of the button's current
+   *   state relative to its possible states. These states match the Rainmeter
+   *   plugin's repeat states: 0 is loop off, 1 is loop all, 2 is loop one.
+   *   Finally, if this method doesn't support the button passed, return null.
+   */
+  function checkTopLevelButton(menu, { query, val } = {}) {
+    if (!menu || !query) return null;
+    let buttons = menu.querySelector("#top-level-buttons");
+    if (!buttons || buttons.hidden) buttons = menu.querySelector("#top-level-buttons-computed");
+    if (!buttons) return null;
+
+    buttons = [...buttons.children];
+    let button = buttons.find(btn => {
+      let found = btn.wrappedJSObject?.get(query);
+      XPCNativeWrapper(found);
+      if (val) return found === val;
+      else return !!found;
+    });
+    if (!button) return null;
+
+    let data = button.wrappedJSObject?.get("data");
+    XPCNativeWrapper(data);
+    if (data && data.states) {
+      let states = [...data.states]?.map(state => {
+        for (let prop in state) {
+          if (typeof state[prop] === "object" && "state" in state[prop]) return state[prop].state;
+        }
+      });
+      if (states) {
+        // loop states = ["PLAYLIST_LOOP_STATE_NONE", "PLAYLIST_LOOP_STATE_ALL", "PLAYLIST_LOOP_STATE_ONE"];
+        let currentState = button.wrappedJSObject?.get("currentState");
+        XPCNativeWrapper(currentState);
+        if (currentState) return Math.max(states.indexOf(currentState), 0);
+      }
+    }
+
+    return button.classList.contains("style-default-active");
+  }
+
+  let lastImgVideoID = "";
+  let currImg = "";
+  let currCategory = "";
+
+  let youtubeInfoHandler = createNewMusicInfo();
 
   youtubeInfoHandler.player = function () {
     return "YouTube";
@@ -264,24 +244,24 @@ function setup() {
         qual = "/maxresdefault.jpg";
       img.setAttribute("src", strr + videoId + qual);
       img.addEventListener("load", function () {
-        if (img.height > 90) currIMG = strr + videoId + qual;
-        else currIMG = strr + videoId + "/hqdefault.jpg?";
+        if (img.height > 90) currImg = strr + videoId + qual;
+        else currImg = strr + videoId + "/hqdefault.jpg?";
       });
       img.addEventListener("error", function () {
         if (img.src.includes("maxresdefault")) {
           qual = "/hqdefault.jpg";
-          currIMG = strr + videoId + qual;
+          currImg = strr + videoId + qual;
         } else if (img.src.includes("hqdefault")) {
           qual = "/mqdefault.jpg";
-          currIMG = strr + videoId + qual;
+          currImg = strr + videoId + qual;
         } else if (img.src.includes("mqdefault")) {
           qual = "/maxresdefault.jpg";
-          currIMG = strr + lastImgVideoID + qual;
+          currImg = strr + lastImgVideoID + qual;
         }
         img.setAttribute("src", strr + videoId + qual);
       });
     }
-    return currIMG;
+    return currImg;
   };
 
   youtubeInfoHandler.durationString = function () {
@@ -326,7 +306,7 @@ function setup() {
     return 0;
   };
 
-  var youtubeEventHandler = createNewMusicEventHandler();
+  let youtubeEventHandler = createNewMusicEventHandler();
 
   youtubeEventHandler.readyCheck = null;
 

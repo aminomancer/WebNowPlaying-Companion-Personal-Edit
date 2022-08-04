@@ -1,11 +1,11 @@
 //Adds support for the new youtube layout
 /*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
 
-var lastImgVideoID = false;
-var currIMG = "";
-
 function setupTV() {
-  var youtubeInfoHandler = createNewMusicInfo();
+  let lastImgVideoID = "";
+  let currImg = "";
+
+  let youtubeInfoHandler = createNewMusicInfo();
 
   youtubeInfoHandler.player = function () {
     return "YouTube TV";
@@ -19,7 +19,7 @@ function setupTV() {
   };
 
   youtubeInfoHandler.state = function () {
-    var state = document.getElementsByClassName("html5-main-video")[0].paused ? 2 : 1;
+    let state = document.getElementsByClassName("html5-main-video")[0].paused ? 2 : 1;
     //if (document.getElementsByClassName("ytp-play-button")[0].getAttribute("aria-label") === null)
     //{
     //	state = 3;
@@ -46,28 +46,28 @@ function setupTV() {
     return "";
   };
   youtubeInfoHandler.cover = function () {
-    var videoID = window.location.href.substring(
+    let videoID = window.location.href.substring(
       window.location.href.indexOf("v=") + 2,
       window.location.href.indexOf("v=") + 2 + 11
     );
 
     if (lastImgVideoID !== videoID) {
       lastImgVideoID = videoID;
-      var img = document.createElement("img");
+      let img = document.createElement("img");
       img.setAttribute("src", "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?");
       img.addEventListener("load", function () {
         if (img.height > 90) {
-          currIMG = "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?";
+          currImg = "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?";
         } else {
-          currIMG = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
+          currImg = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
         }
       });
       img.addEventListener("error", function () {
-        currIMG = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
+        currImg = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
       });
     }
 
-    return currIMG;
+    return currImg;
   };
   youtubeInfoHandler.duration = function () {
     return document.getElementsByClassName("html5-main-video")[0].duration;
@@ -91,7 +91,7 @@ function setupTV() {
     return 0;
   };
 
-  var youtubeEventHandler = createNewMusicEventHandler();
+  let youtubeEventHandler = createNewMusicEventHandler();
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
   youtubeEventHandler.readyCheck = null;
@@ -105,8 +105,8 @@ function setupTV() {
   };
   //@TODO implement tab handling
   youtubeEventHandler.next = function () {
-    var a = document.getElementsByClassName("icon-player-next button")[0];
-    var e = document.createEvent("MouseEvents");
+    let a = document.getElementsByClassName("icon-player-next button")[0];
+    let e = document.createEvent("MouseEvents");
 
     e.initMouseEvent(
       "mousedown",
@@ -146,8 +146,8 @@ function setupTV() {
     a.dispatchEvent(e);
   };
   youtubeEventHandler.previous = function () {
-    var a = document.getElementsByClassName("icon-player-prev button")[0];
-    var e = document.createEvent("MouseEvents");
+    let a = document.getElementsByClassName("icon-player-prev button")[0];
+    let e = document.createEvent("MouseEvents");
 
     e.initMouseEvent(
       "mousedown",
@@ -198,7 +198,7 @@ function setupTV() {
     document.getElementsByClassName("html5-main-video")[0].volume = volume;
   };
   youtubeEventHandler.repeat = function () {
-    var repeat = !document.getElementsByClassName("html5-main-video")[0].loop;
+    let repeat = !document.getElementsByClassName("html5-main-video")[0].loop;
     document.getElementsByClassName("html5-main-video")[0].loop = repeat;
   };
   youtubeEventHandler.shuffle = null;
