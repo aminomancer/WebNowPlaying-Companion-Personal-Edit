@@ -9,7 +9,7 @@ function getContext() {
 }
 
 function findReact(dom) {
-  for (var key in dom) if (key.startsWith("__reactInternalInstance$")) return dom[key].child;
+  for (var key in dom) if (key.startsWith("__reactInternalInstance$")) return dom[key];
   return null;
 }
 
@@ -28,16 +28,20 @@ function getRepo(context) {
 }
 
 function getSessionId() {
-  const react = getReactFromSelector(`.watch-video--player-view`);
-  return react?.memoizedProps?.sessionId;
+  const react = getReactFromSelector(`.watch-video`);
+  return react?.return?.memoizedState?.sessionData?.sessionId;
 }
 
 function getAPI() {
-  return getContext()?.getState().playerApp.getAPI();
+  return getContext()
+    ?.getState()
+    .playerApp.getAPI();
 }
 
 function getActionCreators() {
-  return getContext()?.getPlayerApp().getActionCreators();
+  return getContext()
+    ?.getPlayerApp()
+    .getActionCreators();
 }
 
 function getPlayer() {
@@ -51,9 +55,11 @@ function getPlayer() {
 
 function getMetadata() {
   try {
-    return Object.values(getContext()?.getPlayerApp().getState()?.videoPlayer.videoMetadata).find(
-      data => "_video" in data
-    );
+    return Object.values(
+      getContext()
+        ?.getPlayerApp()
+        .getState()?.videoPlayer.videoMetadata
+    ).find(data => "_video" in data);
   } catch (e) {
     return null;
   }
@@ -98,21 +104,21 @@ function getNavData() {
 
 function setup() {
   var netflixInfoHandler = createNewMusicInfo();
-  netflixInfoHandler.player = function () {
+  netflixInfoHandler.player = function() {
     return "Netflix";
   };
-  netflixInfoHandler.readyCheck = function () {
+  netflixInfoHandler.readyCheck = function() {
     let player = getPlayer();
     return player && player.isReady() && player.getDuration() > 0;
   };
-  netflixInfoHandler.state = function () {
+  netflixInfoHandler.state = function() {
     let player = getPlayer();
     if (!player || !player.isReady()) return 0;
     let state = player.getPaused() ? 2 : 1;
     if (state == 1 && document.querySelector("video").played.length <= 0) state = 2;
     return state;
   };
-  netflixInfoHandler.title = function () {
+  netflixInfoHandler.title = function() {
     let data = getSeasonData();
     if (data)
       if (data.type === "show" && data.episode?.title) {
@@ -122,18 +128,18 @@ function setup() {
         return String(title);
       } else return String(data.title);
   };
-  netflixInfoHandler.artist = function () {
+  netflixInfoHandler.artist = function() {
     let data = getSeasonData();
     if (data && data.type === "show" && data.episode?.title) return String(data.title);
     else return "Netflix";
   };
-  netflixInfoHandler.album = function () {
+  netflixInfoHandler.album = function() {
     let data = getSeasonData();
     if (data && data.type === "show" && data.episode?.title && data.season.longName)
       return String(data.season.longName);
     else return "Netflix";
   };
-  netflixInfoHandler.cover = function () {
+  netflixInfoHandler.cover = function() {
     const { artwork, boxart, storyart } = getMetadata()?._metadata.video;
     let art;
     if (artwork?.length > 0) art = artwork;
@@ -144,16 +150,16 @@ function setup() {
     });
     return String(art?.url) || "";
   };
-  netflixInfoHandler.duration = function () {
+  netflixInfoHandler.duration = function() {
     return getPlayer().getDuration() / 1000;
   };
-  netflixInfoHandler.position = function () {
+  netflixInfoHandler.position = function() {
     return getPlayer().getCurrentTime() / 1000;
   };
-  netflixInfoHandler.volume = function () {
+  netflixInfoHandler.volume = function() {
     return getPlayer().getVolume();
   };
-  netflixInfoHandler.rating = function () {
+  netflixInfoHandler.rating = function() {
     let { userRating } = getMetadata()?._metadata.video.userRating;
     if (userRating === 2) return 5;
     else return Number(userRating || 0);
@@ -162,28 +168,28 @@ function setup() {
   netflixInfoHandler.shuffle = null;
 
   var netflixEventHandler = createNewMusicEventHandler();
-  netflixEventHandler.readyCheck = function () {
+  netflixEventHandler.readyCheck = function() {
     let player = getPlayer();
     return player && player.isReady() && player.getDuration() > 0;
   };
-  netflixEventHandler.playpause = function () {
+  netflixEventHandler.playpause = function() {
     let player = getPlayer();
     player.getPaused() ? player.play() : player.pause();
   };
-  netflixEventHandler.next = function () {
+  netflixEventHandler.next = function() {
     let data = getNavData();
     if (data?.nextId && data?.currId)
       document.location.href = document.location.href.replace(data.currId, data.nextId);
   };
-  netflixEventHandler.previous = function () {
+  netflixEventHandler.previous = function() {
     let data = getNavData();
     if (data?.prevId && data?.currId)
       document.location.href = document.location.href.replace(data.currId, data.prevId);
   };
-  netflixEventHandler.progressSeconds = function (position) {
+  netflixEventHandler.progressSeconds = function(position) {
     getPlayer().seek(position * 1000);
   };
-  netflixEventHandler.volume = function (volume) {
+  netflixEventHandler.volume = function(volume) {
     getPlayer().setVolume(volume);
   };
   netflixEventHandler.repeat = null;
