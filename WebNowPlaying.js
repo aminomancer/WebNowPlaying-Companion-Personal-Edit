@@ -39,7 +39,9 @@ function pad(number, length) {
 //Convert seconds to a time string acceptable to Rainmeter
 function convertTimeToString(timeInSeconds) {
   let timeInMinutes = parseInt(timeInSeconds / 60);
-  if (timeInMinutes < 60) return timeInMinutes + ":" + pad(parseInt(timeInSeconds % 60), 2);
+  if (timeInMinutes < 60) {
+    return timeInMinutes + ":" + pad(parseInt(timeInSeconds % 60), 2);
+  }
   return (
     parseInt(timeInMinutes / 60) +
     ":" +
@@ -70,7 +72,10 @@ function fancyTimeFormat(time) {
 //Convert every words to start with capital (Note: Does NOT ignore words that should not be)
 function capitalize(str) {
   str = str.replace(/-/g, " ");
-  return str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+  return str.replace(
+    /\w\S*/g,
+    txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+  );
 }
 
 /*
@@ -149,7 +154,11 @@ function updateInfo() {
     try {
       if (musicInfo.state !== null) {
         temp = musicInfo.state();
-        if (currState !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currState !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("STATE:" + temp);
           currState = temp;
           if (currState > 0) chrome.runtime.sendMessage({ method: "open" });
@@ -165,7 +174,11 @@ function updateInfo() {
     try {
       if (musicInfo.title !== null) {
         temp = musicInfo.title();
-        if (currTitle !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currTitle !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("TITLE:" + temp);
           currTitle = temp;
         }
@@ -180,7 +193,11 @@ function updateInfo() {
     try {
       if (musicInfo.artist !== null) {
         temp = musicInfo.artist();
-        if (currArtist !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currArtist !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("ARTIST:" + temp);
           currArtist = temp;
         }
@@ -195,7 +212,11 @@ function updateInfo() {
     try {
       if (musicInfo.album !== null) {
         temp = musicInfo.album();
-        if (currAlbum !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currAlbum !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("ALBUM:" + temp);
           currAlbum = temp;
         }
@@ -210,7 +231,11 @@ function updateInfo() {
     try {
       if (musicInfo.cover !== null) {
         temp = musicInfo.cover();
-        if (currCover !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currCover !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("COVER:" + temp.replace("https://", "http://"));
           currCover = temp;
         }
@@ -225,7 +250,11 @@ function updateInfo() {
     try {
       if (musicInfo.durationString !== null) {
         temp = musicInfo.durationString();
-        if (currDur !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currDur !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("DURATION:" + temp);
           currDur = temp;
         }
@@ -246,7 +275,11 @@ function updateInfo() {
     try {
       if (musicInfo.positionString !== null) {
         temp = musicInfo.positionString();
-        if (currPos !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currPos !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("POSITION:" + temp);
           currPos = temp;
         }
@@ -282,7 +315,11 @@ function updateInfo() {
     try {
       if (musicInfo.rating !== null) {
         temp = musicInfo.rating();
-        if (currRating !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currRating !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("RATING:" + temp);
           currRating = temp;
         }
@@ -297,7 +334,11 @@ function updateInfo() {
     try {
       if (musicInfo.repeat !== null) {
         temp = musicInfo.repeat();
-        if (currRepeat !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currRepeat !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("REPEAT:" + temp);
           currRepeat = temp;
         }
@@ -312,7 +353,11 @@ function updateInfo() {
     try {
       if (musicInfo.shuffle !== null) {
         temp = musicInfo.shuffle();
-        if (currShuffle !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currShuffle !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("SHUFFLE:" + temp);
           currShuffle = temp;
         }
@@ -329,7 +374,11 @@ function updateInfo() {
     try {
       if (musicInfo.trackID !== null) {
         temp = musicInfo.trackID();
-        if (currShuffle !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currShuffle !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("TRACKID:" + temp);
           currShuffle = temp;
         }
@@ -344,7 +393,11 @@ function updateInfo() {
     try {
       if (musicInfo.artistID !== null) {
         temp = musicInfo.artistID();
-        if (currShuffle !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currShuffle !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("ARTISTID:" + temp);
           currShuffle = temp;
         }
@@ -359,7 +412,11 @@ function updateInfo() {
     try {
       if (musicInfo.albumID !== null) {
         temp = musicInfo.albumID();
-        if (currShuffle !== temp && temp !== null && ws.readyState == WebSocket.OPEN) {
+        if (
+          currShuffle !== temp &&
+          temp !== null &&
+          ws.readyState == WebSocket.OPEN
+        ) {
           ws.send("ALBUMID:" + temp);
           currShuffle = temp;
         }
@@ -370,11 +427,9 @@ function updateInfo() {
         ws.send("ErrorD:" + e);
       }
     }
-  } else {
-    if (currState !== 0) {
-      ws.send("STATE:" + 0);
-      currState = 0;
-    }
+  } else if (currState !== 0) {
+    ws.send("STATE:" + 0);
+    currState = 0;
   }
 }
 
@@ -392,10 +447,16 @@ function fireEvent(event) {
     if (musicEvents.readyCheck === null || musicEvents.readyCheck()) {
       let type = event.data.toLowerCase();
 
-      if (type == "playpause" && musicEvents.playpause !== null) musicEvents.playpause();
-      else if (type == "next" && musicEvents.next !== null) musicEvents.next();
-      else if (type == "previous" && musicEvents.previous !== null) musicEvents.previous();
-      else if (type.includes("setprogress ") || type.includes("setposition ")) {
+      if (type == "playpause" && musicEvents.playpause !== null) {
+        musicEvents.playpause();
+      } else if (type == "next" && musicEvents.next !== null) {
+        musicEvents.next();
+      } else if (type == "previous" && musicEvents.previous !== null) {
+        musicEvents.previous();
+      } else if (
+        type.includes("setprogress ") ||
+        type.includes("setposition ")
+      ) {
         if (musicEvents.progress !== null) {
           //+9 because "progress " is 9 chars
           let progress = type.substring(type.indexOf("progress ") + 9);
@@ -408,19 +469,33 @@ function fireEvent(event) {
           //Goto the : at the end of the command, this command is now a compound command the first half is seconds the second is percent
           position = parseInt(position.substring(0, position.indexOf(":")));
           musicEvents.progressSeconds(position);
-        } else return;
+        } else {
+          return;
+        }
       } else if (type.includes("setvolume ") && musicEvents.volume !== null) {
         //+7 because "volume " is 7 chars
-        let volume = parseInt(type.substring(type.indexOf("volume ") + 7)) / 100;
+        let volume =
+          parseInt(type.substring(type.indexOf("volume ") + 7)) / 100;
         musicEvents.volume(volume);
-      } else if (type == "repeat" && musicEvents.repeat !== null) musicEvents.repeat();
-      else if (type == "shuffle" && musicEvents.shuffle !== null) musicEvents.shuffle();
-      else if (type == "togglethumbsup" && musicEvents.toggleThumbsUp !== null) {
+      } else if (type == "repeat" && musicEvents.repeat !== null) {
+        musicEvents.repeat();
+      } else if (type == "shuffle" && musicEvents.shuffle !== null) {
+        musicEvents.shuffle();
+      } else if (
+        type == "togglethumbsup" &&
+        musicEvents.toggleThumbsUp !== null
+      ) {
         musicEvents.toggleThumbsUp();
-      } else if (type == "togglethumbsdown" && musicEvents.toggleThumbsDown !== null) {
+      } else if (
+        type == "togglethumbsdown" &&
+        musicEvents.toggleThumbsDown !== null
+      ) {
         musicEvents.toggleThumbsDown();
-      } else if (type == "rating " && musicEvents.rating !== null) musicEvents.rating();
-      else return;
+      } else if (type == "rating " && musicEvents.rating !== null) {
+        musicEvents.rating();
+      } else {
+        return;
+      }
 
       if (connected) updateInfo();
     }
@@ -443,20 +518,22 @@ oo     .d8P  888       o      888       `88.    .8'   888
 
 function init() {
   ws = new WebSocket("ws://127.0.0.1:8974/");
-  ws.onopen = function () {
+  ws.onopen = function() {
     connected = true;
     currPlayer = musicInfo.player();
     ws.send("PLAYER:" + currPlayer);
     sendData = setInterval(() => updateInfo(), 50);
-    if (!(currState && currState > 0)) chrome.runtime.sendMessage({ method: "closed" });
+    if (!(currState && currState > 0)) {
+      chrome.runtime.sendMessage({ method: "closed" });
+    }
   };
-  ws.onclose = function () {
+  ws.onclose = function() {
     connected = false;
     chrome.runtime.sendMessage({ method: "closed" });
     clearInterval(sendData);
     reconnect = setTimeout(() => init(), 5000);
   };
-  ws.onmessage = function (event) {
+  ws.onmessage = function(event) {
     try {
       fireEvent(event);
     } catch (e) {
@@ -464,8 +541,10 @@ function init() {
       throw e;
     }
   };
-  ws.onerror = function (event) {
-    if (typeof event.data != "undefined") console.error("Websocket Error:" + event.data);
+  ws.onerror = function(event) {
+    if (typeof event.data != "undefined") {
+      console.error("Websocket Error:" + event.data);
+    }
   };
 
   currPlayer = null;
@@ -487,8 +566,8 @@ function init() {
   currAlbumID = null;
 }
 
-window.onbeforeunload = function () {
-  ws.onclose = function () {}; // disable onclose handler first
+window.onbeforeunload = function() {
+  ws.onclose = function() {}; // disable onclose handler first
   ws.close();
   chrome.runtime.sendMessage({ method: "closed" });
 };
