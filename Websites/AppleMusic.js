@@ -1,54 +1,58 @@
 //Adds support for Apple Music
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
+/* import-globals-from ../WebNowPlaying.js */
 
 function setup() {
   var appleMusicInfoHandler = createNewMusicInfo();
 
-  appleMusicInfoHandler.player = function () {
+  appleMusicInfoHandler.player = function() {
     return "Apple Music";
   };
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
-  appleMusicInfoHandler.readyCheck = function () {
+  appleMusicInfoHandler.readyCheck = function() {
     return (
-      document.getElementsByTagName("audio").length > 0 &&
+      !!document.getElementsByTagName("audio").length &&
       document.getElementById("playback-name").innerText != ""
     );
   };
 
-  appleMusicInfoHandler.state = function () {
+  appleMusicInfoHandler.state = function() {
     return document.getElementsByTagName("audio")[0].paused ? 2 : 1;
   };
-  appleMusicInfoHandler.title = function () {
+  appleMusicInfoHandler.title = function() {
     return document.getElementById("playback-name").innerText;
   };
-  appleMusicInfoHandler.artist = function () {
-    return document.getElementById("playback-sub-copy").children[0].children[0].children[0]
-      .children[0].children[0].innerText;
+  appleMusicInfoHandler.artist = function() {
+    return document.getElementById("playback-sub-copy").children[0].children[0]
+      .children[0].children[0].children[0].innerText;
   };
-  appleMusicInfoHandler.album = function () {
-    return document.getElementById("playback-sub-copy").children[0].children[0].children[0]
-      .children[0].children[1].innerText;
+  appleMusicInfoHandler.album = function() {
+    return document.getElementById("playback-sub-copy").children[0].children[0]
+      .children[0].children[0].children[1].innerText;
   };
-  appleMusicInfoHandler.cover = function () {
+  appleMusicInfoHandler.cover = function() {
     var tempCover = document
       .getElementsByClassName("media-artwork-v2__image")[2]
       .srcset.substr(
-        document.getElementsByClassName("media-artwork-v2__image")[2].srcset.lastIndexOf(",") + 2
+        document
+          .getElementsByClassName("media-artwork-v2__image")[2]
+          .srcset.lastIndexOf(",") + 2
       );
-    return tempCover.substr(0, tempCover.indexOf(".jpg")) + ".jpg/2000x2000.jpg";
+    return (
+      tempCover.substr(0, tempCover.indexOf(".jpg")) + ".jpg/2000x2000.jpg"
+    );
   };
-  appleMusicInfoHandler.duration = function () {
+  appleMusicInfoHandler.duration = function() {
     return document.getElementsByTagName("audio")[0].duration;
   };
-  appleMusicInfoHandler.position = function () {
+  appleMusicInfoHandler.position = function() {
     return document.getElementsByTagName("audio")[0].currentTime;
   };
-  appleMusicInfoHandler.volume = function () {
+  appleMusicInfoHandler.volume = function() {
     return document.getElementsByTagName("audio")[0].volume;
   };
   appleMusicInfoHandler.rating = null;
-  appleMusicInfoHandler.repeat = function () {
+  appleMusicInfoHandler.repeat = function() {
     if (
       document
         .querySelector('[class*="playback-controls"]')
@@ -68,7 +72,7 @@ function setup() {
     }
     return 0;
   };
-  appleMusicInfoHandler.shuffle = function () {
+  appleMusicInfoHandler.shuffle = function() {
     if (
       document
         .querySelector('[class*="playback-controls"]')
@@ -82,41 +86,45 @@ function setup() {
   var appleMusicEventHandler = createNewMusicEventHandler();
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
-  appleMusicEventHandler.readyCheck = function () {
+  appleMusicEventHandler.readyCheck = function() {
     return (
-      document.getElementsByTagName("audio").length > 0 &&
+      !!document.getElementsByTagName("audio").length &&
       document.getElementById("playback-name").innerText != ""
     );
   };
 
-  appleMusicEventHandler.playpause = function () {
+  appleMusicEventHandler.playpause = function() {
     if (document.getElementsByTagName("audio")[0].paused) {
       document.getElementsByTagName("audio")[0].play();
     } else {
       document.getElementsByTagName("audio")[0].pause();
     }
   };
-  appleMusicEventHandler.next = function () {
+  appleMusicEventHandler.next = function() {
     document
       .querySelector('[class*="playback-controls"]')
       .children[0].children[1].children[2].click();
   };
-  appleMusicEventHandler.previous = function () {
+  appleMusicEventHandler.previous = function() {
     document
       .querySelector('[class*="playback-controls"]')
       .children[0].children[1].children[0].click();
   };
-  appleMusicEventHandler.progressSeconds = function (position) {
+  appleMusicEventHandler.progressSeconds = function(position) {
     document.getElementsByTagName("audio")[0].currentTime = position;
   };
-  appleMusicEventHandler.volume = function (volume) {
+  appleMusicEventHandler.volume = function(volume) {
     document.getElementsByTagName("audio")[0].volume = volume;
   };
-  appleMusicEventHandler.repeat = function () {
-    document.querySelector('[class*="playback-controls"]').children[0].children[2].click();
+  appleMusicEventHandler.repeat = function() {
+    document
+      .querySelector('[class*="playback-controls"]')
+      .children[0].children[2].click();
   };
-  appleMusicEventHandler.shuffle = function () {
-    document.querySelector('[class*="playback-controls"]').children[0].children[0].click();
+  appleMusicEventHandler.shuffle = function() {
+    document
+      .querySelector('[class*="playback-controls"]')
+      .children[0].children[0].click();
   };
   appleMusicEventHandler.toggleThumbsUp = null;
   appleMusicEventHandler.toggleThumbsDown = null;

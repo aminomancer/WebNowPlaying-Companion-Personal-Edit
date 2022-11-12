@@ -1,5 +1,5 @@
 //Decides which version of youtube the user is using.
-/*global init setupNew setupOld setupTV*/
+/* import-globals-from ../WebNowPlaying.js */
 
 if (document.location.href.includes("/tv#/")) {
   setupTV();

@@ -1,5 +1,5 @@
 //Adds support for the new youtube layout
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize fancyTimeFormat currShuffle*/
+/* import-globals-from ../WebNowPlaying.js */
 
 function setupEmbedded() {
   let lastImgVideoID = "";
@@ -109,7 +109,9 @@ function setupEmbedded() {
   };
 
   youtubeEmbeddedInfoHandler.volume = function() {
-    return document.getElementsByClassName("html5-main-video")[0].volume;
+    let video = document.getElementsByClassName("html5-main-video")[0];
+    if (!video.muted) return video.volume;
+    return 0;
   };
 
   youtubeEmbeddedInfoHandler.rating = function() {

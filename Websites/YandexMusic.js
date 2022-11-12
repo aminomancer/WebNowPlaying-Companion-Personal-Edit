@@ -1,5 +1,5 @@
 //Adds support for Yandex Music
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
+/* import-globals-from ../WebNowPlaying.js */
 
 var lastAlbumURL = "";
 var lastKnownAlbum = "";
@@ -7,32 +7,36 @@ var lastKnownAlbum = "";
 function setup() {
   var yandexMusicInfoHandler = createNewMusicInfo();
 
-  yandexMusicInfoHandler.player = function () {
+  yandexMusicInfoHandler.player = function() {
     return "Yandex Music";
   };
 
-  yandexMusicInfoHandler.readyCheck = function () {
-    return document.getElementsByClassName("track__title").length > 0;
+  yandexMusicInfoHandler.readyCheck = function() {
+    return !!document.getElementsByClassName("track__title").length;
   };
 
-  yandexMusicInfoHandler.state = function () {
-    return document.getElementsByClassName("player-controls__btn_pause")[0] ? 1 : 2;
+  yandexMusicInfoHandler.state = function() {
+    return document.getElementsByClassName("player-controls__btn_pause")[0]
+      ? 1
+      : 2;
   };
 
-  yandexMusicInfoHandler.title = function () {
+  yandexMusicInfoHandler.title = function() {
     return document.getElementsByClassName("track__title")[0].innerText;
   };
 
-  yandexMusicInfoHandler.artist = function () {
+  yandexMusicInfoHandler.artist = function() {
     return document.getElementsByClassName("track__artists")[0].innerText;
   };
 
-  yandexMusicInfoHandler.album = function () {
-    if (lastAlbumURL !== document.getElementsByClassName("track__title")[0].href) {
+  yandexMusicInfoHandler.album = function() {
+    if (
+      lastAlbumURL !== document.getElementsByClassName("track__title")[0].href
+    ) {
       lastAlbumURL = document.getElementsByClassName("track__title")[0].href;
 
       var ajaxReq = new XMLHttpRequest();
-      ajaxReq.onreadystatechange = function () {
+      ajaxReq.onreadystatechange = function() {
         if (ajaxReq.readyState == 4) {
           var jsonAlbum = JSON.parse(ajaxReq.response);
           lastKnownAlbum = jsonAlbum.title;
@@ -56,55 +60,63 @@ function setup() {
     return lastKnownAlbum;
   };
 
-  yandexMusicInfoHandler.cover = function () {
+  yandexMusicInfoHandler.cover = function() {
     return document
       .getElementsByClassName("track_type_player")[0]
       .getElementsByClassName("entity-cover__image")[0]
       .src.replace("50x50", "1000x1000");
   };
 
-  yandexMusicInfoHandler.durationString = function () {
+  yandexMusicInfoHandler.durationString = function() {
     return document.getElementsByClassName("progress__right")[0].innerText;
   };
 
-  yandexMusicInfoHandler.positionString = function () {
+  yandexMusicInfoHandler.positionString = function() {
     return document.getElementsByClassName("progress__left")[0].innerText;
   };
 
-  yandexMusicInfoHandler.volume = function () {
+  yandexMusicInfoHandler.volume = function() {
     return (
       parseInt(
-        document.getElementsByClassName("volume__bar")[0].children[0].children[0].children[0].style
-          .height
+        document.getElementsByClassName("volume__bar")[0].children[0]
+          .children[0].children[0].style.height
       ) / 100
     );
   };
 
-  yandexMusicInfoHandler.rating = function () {
+  yandexMusicInfoHandler.rating = function() {
     if (
       document
         .getElementsByClassName("player-controls__track-controls")[0]
         .children[0].classList.contains("d-like_on")
     ) {
       return 5;
-    } else if (document.getElementsByClassName("d-icon_circle-crossed_on").length > 0) {
+    } else if (
+      document.getElementsByClassName("d-icon_circle-crossed_on").length
+    ) {
       return 1;
     }
     return 0;
   };
 
-  yandexMusicInfoHandler.repeat = function () {
-    if (document.getElementsByClassName("player-controls__btn_repeat_state2").length > 0) {
+  yandexMusicInfoHandler.repeat = function() {
+    if (
+      document.getElementsByClassName("player-controls__btn_repeat_state2")
+        .length
+    ) {
       return 1;
-    } else if (document.getElementsByClassName("player-controls__btn_repeat_state1").length > 0) {
+    } else if (
+      document.getElementsByClassName("player-controls__btn_repeat_state1")
+        .length
+    ) {
       return 2;
     }
 
     return 0;
   };
 
-  yandexMusicInfoHandler.shuffle = function () {
-    if (document.getElementsByClassName("d-icon_shuffle-gold").length > 0) {
+  yandexMusicInfoHandler.shuffle = function() {
+    if (document.getElementsByClassName("d-icon_shuffle-gold").length) {
       return 1;
     }
 
@@ -113,23 +125,23 @@ function setup() {
 
   var yandexMusicEventHandler = createNewMusicEventHandler();
 
-  yandexMusicEventHandler.readyCheck = function () {
-    return document.getElementsByClassName("track__title").length > 0;
+  yandexMusicEventHandler.readyCheck = function() {
+    return !!document.getElementsByClassName("track__title").length;
   };
 
-  yandexMusicEventHandler.playpause = function () {
+  yandexMusicEventHandler.playpause = function() {
     document.getElementsByClassName("player-controls__btn_play")[0].click();
   };
 
-  yandexMusicEventHandler.next = function () {
+  yandexMusicEventHandler.next = function() {
     document.getElementsByClassName("player-controls__btn_next")[0].click();
   };
 
-  yandexMusicEventHandler.previous = function () {
+  yandexMusicEventHandler.previous = function() {
     document.getElementsByClassName("player-controls__btn_prev")[0].click();
   };
 
-  yandexMusicEventHandler.progressSeconds = function (position) {
+  yandexMusicEventHandler.progressSeconds = function(position) {
     //Add HTML element <script>
     var scriptHTML = document.createElement("script");
     scriptHTML.classList.add("embedded-script-progress");
@@ -141,7 +153,7 @@ function setup() {
     document.head.appendChild(scriptHTML);
   };
 
-  yandexMusicEventHandler.volume = function (volume) {
+  yandexMusicEventHandler.volume = function(volume) {
     var scriptHTML = document.createElement("script");
     scriptHTML.classList.add("embedded-script-volume");
     scriptHTML.innerText =
@@ -151,27 +163,35 @@ function setup() {
     document.head.appendChild(scriptHTML);
   };
 
-  yandexMusicEventHandler.repeat = function () {
+  yandexMusicEventHandler.repeat = function() {
     document.getElementsByClassName("player-controls__btn_repeat")[0].click();
   };
 
-  yandexMusicEventHandler.shuffle = function () {
+  yandexMusicEventHandler.shuffle = function() {
     document.getElementsByClassName("player-controls__btn_shuffle")[0].click();
   };
 
-  yandexMusicEventHandler.toggleThumbsUp = function () {
-    document.getElementsByClassName("player-controls__track-controls")[0].children[0].click();
+  yandexMusicEventHandler.toggleThumbsUp = function() {
+    document
+      .getElementsByClassName("player-controls__track-controls")[0]
+      .children[0].click();
   };
 
-  yandexMusicEventHandler.toggleThumbsDown = function () {
-    document.getElementsByClassName("player-controls__track-controls")[0].children[3].click();
+  yandexMusicEventHandler.toggleThumbsDown = function() {
+    document
+      .getElementsByClassName("player-controls__track-controls")[0]
+      .children[3].click();
   };
 
-  yandexMusicEventHandler.rating = function (rating) {
+  yandexMusicEventHandler.rating = function(rating) {
     if (rating > 3) {
-      document.getElementsByClassName("player-controls__track-controls")[0].children[0].click();
+      document
+        .getElementsByClassName("player-controls__track-controls")[0]
+        .children[0].click();
     } else {
-      document.getElementsByClassName("player-controls__track-controls")[0].children[3].click();
+      document
+        .getElementsByClassName("player-controls__track-controls")[0]
+        .children[3].click();
     }
   };
 }

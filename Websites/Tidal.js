@@ -1,16 +1,16 @@
 //Adds support for Tidal
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
+/* import-globals-from ../WebNowPlaying.js */
 
 var lastKnownVolume = 100;
 
 function setup() {
   var tidalInfoHandler = createNewMusicInfo();
 
-  tidalInfoHandler.player = function () {
+  tidalInfoHandler.player = function() {
     return "Tidal";
   };
 
-  tidalInfoHandler.readyCheck = function () {
+  tidalInfoHandler.readyCheck = function() {
     return document.getElementById("footerPlayer") !== null;
 
     //Tidal removed their media component and baked something else in so this no longer works
@@ -31,70 +31,79 @@ function setup() {
     //	document.querySelector('[class^="mediaInformation"]').children[0].innerText.length > 0;
   };
 
-  tidalInfoHandler.state = function () {
+  tidalInfoHandler.state = function() {
     return document
       .getElementById("footerPlayer")
-      .children[1].children[0].children[2].children[0].children[0].getAttribute("data-test")
+      .children[1].children[0].children[2].children[0].children[0].getAttribute(
+        "data-test"
+      )
       .includes("Pause")
       ? 1
       : 2;
   };
-  tidalInfoHandler.title = function () {
-    return document.getElementById("footerPlayer").children[0].children[1].children[0].children[0]
-      .innerText;
+  tidalInfoHandler.title = function() {
+    return document.getElementById("footerPlayer").children[0].children[1]
+      .children[0].children[0].innerText;
   };
-  tidalInfoHandler.artist = function () {
-    return document.getElementById("footerPlayer").children[0].children[1].children[1].innerText;
+  tidalInfoHandler.artist = function() {
+    return document.getElementById("footerPlayer").children[0].children[1]
+      .children[1].innerText;
   };
-  tidalInfoHandler.album = function () {
+  tidalInfoHandler.album = function() {
     //Sadly while I can get to a page that will tell me the album for the current playing song it is added by JS so I can not take the usual approach
     //So this will sometimes tell you the playlist instead of the album
     //Use textContent because innerText will return an all caps due to CSS styling
-    return document.getElementById("footerPlayer").children[0].children[1].children[2].children[1]
-      .children[0].textContent;
+    return document.getElementById("footerPlayer").children[0].children[1]
+      .children[2].children[1].children[0].textContent;
   };
-  tidalInfoHandler.cover = function () {
+  tidalInfoHandler.cover = function() {
     //Capture small src image
-    var tempIMG =
-      document.getElementById("footerPlayer").children[0].children[0].children[0].children[0]
-        .children[0].children[0].children[0].children[0].src;
+    var tempIMG = document.getElementById("footerPlayer").children[0]
+      .children[0].children[0].children[0].children[0].children[0].children[0]
+      .children[0].src;
     //Remove size and replace it with max size before returning
     return tempIMG.substring(0, tempIMG.lastIndexOf("/")) + "/1280x1280.jpg";
   };
-  tidalInfoHandler.durationString = function () {
-    return document.getElementById("progressBar").parentElement.children[2].innerText;
+  tidalInfoHandler.durationString = function() {
+    return document.getElementById("progressBar").parentElement.children[2]
+      .innerText;
   };
-  tidalInfoHandler.positionString = function () {
-    return document.getElementById("progressBar").parentElement.children[0].innerText;
+  tidalInfoHandler.positionString = function() {
+    return document.getElementById("progressBar").parentElement.children[0]
+      .innerText;
   };
-  tidalInfoHandler.volume = function () {
+  tidalInfoHandler.volume = function() {
     //Volume is no longer always shown, so if it is visible cache that value
     if (document.querySelector('[class^="nativeRange"]').value !== null) {
       lastKnownVolume = document.querySelector('[class^="nativeRange"]').value;
     }
     return lastKnownVolume;
   };
-  tidalInfoHandler.rating = function () {
+  tidalInfoHandler.rating = function() {
     if (
       document
         .getElementById("footerPlayer")
-        .children[0].children[1].children[0].children[1].children[0].getAttribute("aria-checked") ==
-      "true"
+        .children[0].children[1].children[0].children[1].children[0].getAttribute(
+          "aria-checked"
+        ) == "true"
     ) {
       return 5;
     }
     return 0;
   };
-  tidalInfoHandler.repeat = function () {
+  tidalInfoHandler.repeat = function() {
     if (
       document
         .getElementById("footerPlayer")
-        .children[1].children[0].children[4].getAttribute("aria-checked") == "true"
+        .children[1].children[0].children[4].getAttribute("aria-checked") ==
+      "true"
     ) {
       if (
         document
           .getElementById("footerPlayer")
-          .children[1].children[0].children[4].children[0].getAttribute("data-test")
+          .children[1].children[0].children[4].children[0].getAttribute(
+            "data-test"
+          )
           .includes("One")
       ) {
         return 2;
@@ -103,12 +112,13 @@ function setup() {
     }
     return 0;
   };
-  tidalInfoHandler.shuffle = function () {
+  tidalInfoHandler.shuffle = function() {
     //Icon for shuffle button is goofy, they seem to have an oversite in their code and it only has a class when active
     if (
       document
         .getElementById("footerPlayer")
-        .children[1].children[0].children[0].getAttribute("aria-checked") == true
+        .children[1].children[0].children[0].getAttribute("aria-checked") ==
+      true
     ) {
       return 1;
     }
@@ -118,18 +128,24 @@ function setup() {
   var tidalEventHandler = createNewMusicEventHandler();
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
-  tidalEventHandler.readyCheck = function () {
+  tidalEventHandler.readyCheck = function() {
     return document.getElementById("footerPlayer") !== null;
   };
 
-  tidalEventHandler.playpause = function () {
-    document.getElementById("footerPlayer").children[1].children[0].children[2].children[0].click();
+  tidalEventHandler.playpause = function() {
+    document
+      .getElementById("footerPlayer")
+      .children[1].children[0].children[2].children[0].click();
   };
-  tidalEventHandler.next = function () {
-    document.getElementById("footerPlayer").children[1].children[0].children[3].click();
+  tidalEventHandler.next = function() {
+    document
+      .getElementById("footerPlayer")
+      .children[1].children[0].children[3].click();
   };
-  tidalEventHandler.previous = function () {
-    document.getElementById("footerPlayer").children[1].children[0].children[1].click();
+  tidalEventHandler.previous = function() {
+    document
+      .getElementById("footerPlayer")
+      .children[1].children[0].children[1].click();
   };
   //Sadly a likely unintended effect of Tidal using <input> tags is that a quirk of the way the events work cause them not to fire using my usual event hacking
   //I have reverse enineered how both work for the most part and can successfully change them programatically however due to the obfuscation techniques of react
@@ -302,19 +318,23 @@ function setup() {
   //	//document.querySelector('[class^="volumeSlider"]').children[1].dispatchEvent(mouseup);
   //
   //};
-  tidalEventHandler.repeat = function () {
-    document.getElementById("footerPlayer").children[1].children[0].children[4].click();
+  tidalEventHandler.repeat = function() {
+    document
+      .getElementById("footerPlayer")
+      .children[1].children[0].children[4].click();
   };
-  tidalEventHandler.shuffle = function () {
-    document.getElementById("footerPlayer").children[1].children[0].children[0].click();
+  tidalEventHandler.shuffle = function() {
+    document
+      .getElementById("footerPlayer")
+      .children[1].children[0].children[0].click();
   };
-  tidalEventHandler.toggleThumbsUp = function () {
+  tidalEventHandler.toggleThumbsUp = function() {
     document
       .getElementById("footerPlayer")
       .children[0].children[1].children[0].children[1].children[0].click();
   };
   tidalEventHandler.toggleThumbsDown = null;
-  tidalEventHandler.rating = function (rating) {
+  tidalEventHandler.rating = function(rating) {
     //Check if thumbs has two paths, if it does not then it is active
     if (rating > 3) {
       //If thumbs up is not active

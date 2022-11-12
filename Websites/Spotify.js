@@ -1,5 +1,5 @@
 //Adds support for Spotify
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
+/* import-globals-from ../WebNowPlaying.js */
 
 var lastKnownTitle = "";
 var lastKnownAlbum = "";
@@ -11,18 +11,19 @@ var lastKnownAlbumID = "";
 function setup() {
   var spotifyInfoHandler = createNewMusicInfo();
 
-  spotifyInfoHandler.player = function () {
+  spotifyInfoHandler.player = function() {
     return "Spotify";
   };
 
-  spotifyInfoHandler.readyCheck = function () {
+  spotifyInfoHandler.readyCheck = function() {
     return (
-      document.getElementsByClassName("Root__now-playing-bar").length > 0 &&
-      document.getElementsByClassName("Root__now-playing-bar")[0].innerText.length > 0
+      !!document.getElementsByClassName("Root__now-playing-bar").length &&
+      !!document.getElementsByClassName("Root__now-playing-bar")[0].innerText
+        .length
     );
   };
 
-  spotifyInfoHandler.state = function () {
+  spotifyInfoHandler.state = function() {
     return document
       .getElementsByClassName("player-controls__buttons")[0]
       .children[2].getAttribute("aria-label")
@@ -30,54 +31,61 @@ function setup() {
       ? 1
       : 2;
   };
-  spotifyInfoHandler.title = function () {
+  spotifyInfoHandler.title = function() {
     if (
       lastKnownTitle !=
-      document.getElementsByClassName("Root__now-playing-bar")[0].children[0].children[0]
-        .children[0].children[0].children[1].children[0].innerText
+      document.getElementsByClassName("Root__now-playing-bar")[0].children[0]
+        .children[0].children[0].children[0].children[1].children[0].innerText
     ) {
       lastKnownAlbumArt = "";
-      lastKnownTitle =
-        document.getElementsByClassName("Root__now-playing-bar")[0].children[0].children[0]
-          .children[0].children[0].children[1].children[0].innerText;
+      lastKnownTitle = document.getElementsByClassName(
+        "Root__now-playing-bar"
+      )[0].children[0].children[0].children[0].children[0].children[1]
+        .children[0].innerText;
     }
     return lastKnownTitle;
   };
-  spotifyInfoHandler.artist = function () {
-    return document.getElementsByClassName("Root__now-playing-bar")[0].children[0].children[0]
-      .children[0].children[0].children[1].children[1].innerText;
+  spotifyInfoHandler.artist = function() {
+    return document.getElementsByClassName("Root__now-playing-bar")[0]
+      .children[0].children[0].children[0].children[0].children[1].children[1]
+      .innerText;
   };
   spotifyInfoHandler.album = null;
-  spotifyInfoHandler.cover = function () {
+  spotifyInfoHandler.cover = function() {
     //If album art is blank update it
     if (lastKnownAlbumArt === "") {
-      lastKnownAlbumArt =
-        document.getElementsByClassName("cover-art")[0].children[0].children[1].src;
+      lastKnownAlbumArt = document.getElementsByClassName("cover-art")[0]
+        .children[0].children[1].src;
     }
     //If album art is not blank and we have 3 album art then it must be the big version on display so update to current album art
     else if (document.getElementsByClassName("cover-art").length === 3) {
-      lastKnownAlbumArt =
-        document.getElementsByClassName("cover-art")[0].children[0].children[1].src;
+      lastKnownAlbumArt = document.getElementsByClassName("cover-art")[0]
+        .children[0].children[1].src;
     }
     //If it was not blnak and we have less than 3 album art then it is already set to the small album art or it is set to the big album art and the big album art is not visible
     return lastKnownAlbumArt;
   };
-  spotifyInfoHandler.durationString = function () {
-    return document.getElementsByClassName("playback-bar")[0].children[2].innerText;
+  spotifyInfoHandler.durationString = function() {
+    return document.getElementsByClassName("playback-bar")[0].children[2]
+      .innerText;
   };
-  spotifyInfoHandler.positionString = function () {
-    return document.getElementsByClassName("playback-bar")[0].children[0].innerText;
+  spotifyInfoHandler.positionString = function() {
+    return document.getElementsByClassName("playback-bar")[0].children[0]
+      .innerText;
   };
-  spotifyInfoHandler.volume = function () {
+  spotifyInfoHandler.volume = function() {
     return (
       parseFloat(
         document
           .getElementsByClassName("volume-bar")[0]
-          .children[1].children[0].children[0].children[1].style.left.replace("%", "")
+          .children[1].children[0].children[0].children[1].style.left.replace(
+            "%",
+            ""
+          )
       ) / 100
     );
   };
-  spotifyInfoHandler.rating = function () {
+  spotifyInfoHandler.rating = function() {
     //I have to check if it equal to true if I cast it since javascript is javascript
     if (
       document
@@ -90,7 +98,7 @@ function setup() {
     }
     return 0;
   };
-  spotifyInfoHandler.repeat = function () {
+  spotifyInfoHandler.repeat = function() {
     if (
       document
         .getElementsByClassName("player-controls__buttons")[0]
@@ -107,7 +115,7 @@ function setup() {
     }
     return 0;
   };
-  spotifyInfoHandler.shuffle = function () {
+  spotifyInfoHandler.shuffle = function() {
     return document
       .getElementsByClassName("player-controls__buttons")[0]
       .children[0].getAttribute("aria-checked") == "true"
@@ -118,29 +126,37 @@ function setup() {
   var spotifyEventHandler = createNewMusicEventHandler();
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
-  spotifyEventHandler.readyCheck = function () {
+  spotifyEventHandler.readyCheck = function() {
     return (
-      document.getElementsByClassName("Root__now-playing-bar").length > 0 &&
-      document.getElementsByClassName("Root__now-playing-bar")[0].innerText.length > 0
+      !!document.getElementsByClassName("Root__now-playing-bar").length &&
+      !!document.getElementsByClassName("Root__now-playing-bar")[0].innerText
+        .length
     );
   };
 
-  spotifyEventHandler.playpause = function () {
-    document.getElementsByClassName("player-controls__buttons")[0].children[2].click();
+  spotifyEventHandler.playpause = function() {
+    document
+      .getElementsByClassName("player-controls__buttons")[0]
+      .children[2].click();
   };
-  spotifyEventHandler.next = function () {
-    document.getElementsByClassName("player-controls__buttons")[0].children[3].click();
+  spotifyEventHandler.next = function() {
+    document
+      .getElementsByClassName("player-controls__buttons")[0]
+      .children[3].click();
   };
-  spotifyEventHandler.previous = function () {
-    document.getElementsByClassName("player-controls__buttons")[0].children[1].click();
+  spotifyEventHandler.previous = function() {
+    document
+      .getElementsByClassName("player-controls__buttons")[0]
+      .children[1].click();
   };
-  spotifyEventHandler.progress = function (progress) {
+  spotifyEventHandler.progress = function(progress) {
     var loc = document
       .getElementsByClassName("playback-bar")[0]
       .children[1].children[0].getBoundingClientRect();
     progress *= loc.width;
 
-    var a = document.getElementsByClassName("playback-bar")[0].children[1].children[0];
+    var a = document.getElementsByClassName("playback-bar")[0].children[1]
+      .children[0];
     var e = document.createEvent("MouseEvents");
     e.initMouseEvent(
       "mousedown",
@@ -179,13 +195,14 @@ function setup() {
     );
     a.dispatchEvent(e);
   };
-  spotifyEventHandler.volume = function (volume) {
+  spotifyEventHandler.volume = function(volume) {
     var loc = document
       .getElementsByClassName("volume-bar")[0]
       .children[1].children[0].getBoundingClientRect();
     volume *= loc.width;
 
-    var a = document.getElementsByClassName("volume-bar")[0].children[1].children[0];
+    var a = document.getElementsByClassName("volume-bar")[0].children[1]
+      .children[0];
     var e = document.createEvent("MouseEvents");
     e.initMouseEvent(
       "mousedown",
@@ -224,19 +241,23 @@ function setup() {
     );
     a.dispatchEvent(e);
   };
-  spotifyEventHandler.repeat = function () {
-    document.getElementsByClassName("player-controls__buttons")[0].children[4].click();
+  spotifyEventHandler.repeat = function() {
+    document
+      .getElementsByClassName("player-controls__buttons")[0]
+      .children[4].click();
   };
-  spotifyEventHandler.shuffle = function () {
-    document.getElementsByClassName("player-controls__buttons")[0].children[0].click();
+  spotifyEventHandler.shuffle = function() {
+    document
+      .getElementsByClassName("player-controls__buttons")[0]
+      .children[0].click();
   };
-  spotifyEventHandler.toggleThumbsUp = function () {
+  spotifyEventHandler.toggleThumbsUp = function() {
     document
       .getElementsByClassName("Root__now-playing-bar")[0]
       .children[0].children[0].children[0].children[0].children[2].children[0].children[0].click();
   };
   spotifyEventHandler.toggleThumbsDown = null;
-  spotifyEventHandler.rating = function (rating) {
+  spotifyEventHandler.rating = function(rating) {
     if (rating > 3) {
       if (
         document
@@ -249,18 +270,16 @@ function setup() {
           .getElementsByClassName("Root__now-playing-bar")[0]
           .children[0].children[0].children[0].children[0].children[2].children[0].children[0].click();
       }
-    } else {
-      if (
-        document
-          .getElementsByClassName("Root__now-playing-bar")[0]
-          .children[0].children[0].children[0].children[0].children[2].children[0].children[0].getAttribute(
-            "aria-checked"
-          ) == "true"
-      ) {
-        document
-          .getElementsByClassName("Root__now-playing-bar")[0]
-          .children[0].children[0].children[0].children[0].children[2].children[0].children[0].click();
-      }
+    } else if (
+      document
+        .getElementsByClassName("Root__now-playing-bar")[0]
+        .children[0].children[0].children[0].children[0].children[2].children[0].children[0].getAttribute(
+          "aria-checked"
+        ) == "true"
+    ) {
+      document
+        .getElementsByClassName("Root__now-playing-bar")[0]
+        .children[0].children[0].children[0].children[0].children[2].children[0].children[0].click();
     }
   };
 }

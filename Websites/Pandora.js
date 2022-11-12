@@ -1,5 +1,5 @@
 //Adds support for Pandora
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
+/* import-globals-from ../WebNowPlaying.js */
 
 var lastKnownAlbum = "";
 var currAudioElement = null;
@@ -7,30 +7,30 @@ var currAudioElement = null;
 function setup() {
   var pandoraInfoHandler = createNewMusicInfo();
 
-  pandoraInfoHandler.player = function () {
+  pandoraInfoHandler.player = function() {
     return "Pandora";
   };
 
-  pandoraInfoHandler.readyCheck = function () {
+  pandoraInfoHandler.readyCheck = function() {
     //Makes sure the current music element used is up to date
     for (var i = 0; i < document.getElementsByTagName("audio").length; i++) {
       if (document.getElementsByTagName("audio")[i].ontimeupdate === null) {
         //Yes I know this is a hacky way to do this but it works and is rather quite efficient
-        document.getElementsByTagName("audio")[i].ontimeupdate = function () {
+        document.getElementsByTagName("audio")[i].ontimeupdate = function() {
           currAudioElement = this;
         };
       }
     }
 
     return (
-      document.getElementsByClassName("Tuner__Audio__TrackDetail__title").length > 0 &&
-      currAudioElement !== null
+      !!document.getElementsByClassName("Tuner__Audio__TrackDetail__title")
+        .length && currAudioElement !== null
     );
   };
 
-  pandoraInfoHandler.state = function () {
+  pandoraInfoHandler.state = function() {
     //If pandora asked if you are still listening it is paused
-    if (document.getElementsByClassName("StillListeningBody").length > 0) {
+    if (document.getElementsByClassName("StillListeningBody").length) {
       return 2;
     }
     return document
@@ -40,33 +40,44 @@ function setup() {
       ? 2
       : 1;
   };
-  pandoraInfoHandler.title = function () {
+  pandoraInfoHandler.title = function() {
     //Avoid using the titles from WebNowPlaying.js wherever possible
     //This is done so we know when we need to reset the tag used for the album
     /*global currTitle:true*/
     if (
-      currTitle !== document.getElementsByClassName("Tuner__Audio__TrackDetail__title")[0].innerText
+      currTitle !==
+      document.getElementsByClassName("Tuner__Audio__TrackDetail__title")[0]
+        .innerText
     ) {
       lastKnownAlbum = "";
     }
-    return document.getElementsByClassName("Tuner__Audio__TrackDetail__title")[0].innerText;
+    return document.getElementsByClassName(
+      "Tuner__Audio__TrackDetail__title"
+    )[0].innerText;
   };
-  pandoraInfoHandler.artist = function () {
+  pandoraInfoHandler.artist = function() {
     //Avoid using the titles from WebNowPlaying.js wherever possible
     //This is done so we know when we need to reset the tag used for the album
     /*global currAlbum:true*/
     if (
       currAlbum !==
-      document.getElementsByClassName("Tuner__Audio__TrackDetail__artist")[0].innerText
+      document.getElementsByClassName("Tuner__Audio__TrackDetail__artist")[0]
+        .innerText
     ) {
       lastKnownAlbum = "";
     }
-    return document.getElementsByClassName("Tuner__Audio__TrackDetail__artist")[0].innerText;
+    return document.getElementsByClassName(
+      "Tuner__Audio__TrackDetail__artist"
+    )[0].innerText;
   };
-  pandoraInfoHandler.album = function () {
-    if (document.getElementsByClassName("nowPlayingTopInfo__current__albumName").length > 0) {
-      lastKnownAlbum = document.getElementsByClassName("nowPlayingTopInfo__current__albumName")[0]
-        .innerText;
+  pandoraInfoHandler.album = function() {
+    if (
+      document.getElementsByClassName("nowPlayingTopInfo__current__albumName")
+        .length
+    ) {
+      lastKnownAlbum = document.getElementsByClassName(
+        "nowPlayingTopInfo__current__albumName"
+      )[0].innerText;
       return lastKnownAlbum;
     }
     //Fallback for it album is not visible, note that it is url formatted so I have to do extra parsing
@@ -82,54 +93,65 @@ function setup() {
 
     return lastKnownAlbum;
   };
-  pandoraInfoHandler.cover = function () {
-    var cover =
-      document.getElementsByClassName("ImageLoader__cover")[
-        document.getElementsByClassName("ImageLoader__cover").length - 1
-      ].src;
+  pandoraInfoHandler.cover = function() {
+    var cover = document.getElementsByClassName("ImageLoader__cover")[
+      document.getElementsByClassName("ImageLoader__cover").length - 1
+    ].src;
 
     //If cover is default return to use default in Rainmeter
-    if (cover === "https://www.pandora.com/web-version/1.58.0/images/album_90.png") {
+    if (
+      cover === "https://www.pandora.com/web-version/1.58.0/images/album_90.png"
+    ) {
       return "";
     }
     return cover.replace("90W_90H", "500W_500H");
   };
-  pandoraInfoHandler.durationString = function () {
+  pandoraInfoHandler.durationString = function() {
     if (
-      document.getElementsByClassName("VolumeDurationControl__Duration")[0].children[2]
-        .innerText !== ""
+      document.getElementsByClassName("VolumeDurationControl__Duration")[0]
+        .children[2].innerText !== ""
     ) {
-      return document.getElementsByClassName("VolumeDurationControl__Duration")[0].children[2]
-        .innerText;
+      return document.getElementsByClassName(
+        "VolumeDurationControl__Duration"
+      )[0].children[2].innerText;
     }
     return null;
   };
-  pandoraInfoHandler.positionString = function () {
+  pandoraInfoHandler.positionString = function() {
     if (
-      document.getElementsByClassName("VolumeDurationControl__Duration")[0].children[0]
-        .innerText !== ""
+      document.getElementsByClassName("VolumeDurationControl__Duration")[0]
+        .children[0].innerText !== ""
     ) {
-      return document.getElementsByClassName("VolumeDurationControl__Duration")[0].children[0]
-        .innerText;
+      return document.getElementsByClassName(
+        "VolumeDurationControl__Duration"
+      )[0].children[0].innerText;
     }
     return null;
   };
-  pandoraInfoHandler.volume = function () {
+  pandoraInfoHandler.volume = function() {
     return currAudioElement.volume;
   };
-  pandoraInfoHandler.rating = function () {
-    if (document.getElementsByClassName("Tuner__Control__ThumbUp__Button--active").length > 0) {
+  pandoraInfoHandler.rating = function() {
+    if (
+      document.getElementsByClassName("Tuner__Control__ThumbUp__Button--active")
+        .length
+    ) {
       return 5;
     } else if (
-      document.getElementsByClassName("Tuner__Control__ThumbDown__Button--active").length > 0
+      document.getElementsByClassName(
+        "Tuner__Control__ThumbDown__Button--active"
+      ).length
     ) {
       return 1;
     }
     return 0;
   };
   pandoraInfoHandler.repeat = null;
-  pandoraInfoHandler.shuffle = function () {
-    if (document.getElementsByClassName("ShuffleButton__button__shuffleString").length > 0) {
+  pandoraInfoHandler.shuffle = function() {
+    if (
+      document.getElementsByClassName("ShuffleButton__button__shuffleString")
+        .length
+    ) {
       return document
         .getElementsByClassName("ShuffleButton__button__shuffleString")[0]
         .innerText.includes("On")
@@ -142,27 +164,30 @@ function setup() {
   var pandoraEventHandler = createNewMusicEventHandler();
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
-  pandoraEventHandler.readyCheck = function () {
-    return document.getElementsByClassName("Tuner__Audio__TrackDetail__title").length > 0;
+  pandoraEventHandler.readyCheck = function() {
+    return !!document.getElementsByClassName("Tuner__Audio__TrackDetail__title")
+      .length;
   };
 
-  pandoraEventHandler.playpause = function () {
+  pandoraEventHandler.playpause = function() {
     //Click on still listening pop if it exists
-    if (document.getElementsByClassName("StillListeningBody").length > 0) {
-      document.getElementsByClassName("StillListeningBody")[0].children[2].click();
+    if (document.getElementsByClassName("StillListeningBody").length) {
+      document
+        .getElementsByClassName("StillListeningBody")[0]
+        .children[2].click();
     }
     document.getElementsByClassName("PlayButton")[0].click();
   };
-  pandoraEventHandler.next = function () {
+  pandoraEventHandler.next = function() {
     document.getElementsByClassName("SkipButton")[0].click();
   };
-  pandoraEventHandler.previous = function () {
+  pandoraEventHandler.previous = function() {
     document.getElementsByClassName("ReplayButton")[0].click();
   };
-  pandoraEventHandler.progressSeconds = function (position) {
+  pandoraEventHandler.progressSeconds = function(position) {
     currAudioElement.currentTime = position;
   };
-  pandoraEventHandler.volume = function (volume) {
+  pandoraEventHandler.volume = function(volume) {
     if (currAudioElement.muted && volume > 0) {
       currAudioElement.muted = false;
     } else if (volume == 0) {
@@ -171,40 +196,54 @@ function setup() {
     currAudioElement.volume = volume;
   };
   pandoraEventHandler.repeat = null;
-  pandoraEventHandler.shuffle = function () {
+  pandoraEventHandler.shuffle = function() {
     //We only can change shuffle state if it is visable
-    if (document.getElementsByClassName("ShuffleButton__button__shuffleString").length > 0) {
-      document.getElementsByClassName("ShuffleButton__button__shuffleString")[0].click();
+    if (
+      document.getElementsByClassName("ShuffleButton__button__shuffleString")
+        .length
+    ) {
+      document
+        .getElementsByClassName("ShuffleButton__button__shuffleString")[0]
+        .click();
     }
   };
-  pandoraEventHandler.toggleThumbsUp = function () {
+  pandoraEventHandler.toggleThumbsUp = function() {
     document.getElementsByClassName("ThumbUpButton ")[0].click();
   };
-  pandoraEventHandler.toggleThumbsDown = function () {
+  pandoraEventHandler.toggleThumbsDown = function() {
     document.getElementsByClassName("ThumbDownButton")[0].click();
   };
-  pandoraEventHandler.rating = function (rating) {
+  pandoraEventHandler.rating = function(rating) {
     //Check if thumbs has two paths, if it does not then it is active
     if (rating > 3) {
       //If thumbs up is not active
-      if (document.getElementsByClassName("Tuner__Control__ThumbUp__Button--active").length === 0) {
+      if (
+        document.getElementsByClassName(
+          "Tuner__Control__ThumbUp__Button--active"
+        ).length === 0
+      ) {
         document.getElementsByClassName("ThumbUpButton ")[0].click();
       }
     } else if (rating < 3 && rating > 0) {
       //If thumbs down is not active active
       if (
-        document.getElementsByClassName("Tuner__Control__ThumbDown__Button--active").length === 0
+        document.getElementsByClassName(
+          "Tuner__Control__ThumbDown__Button--active"
+        ).length === 0
       ) {
         document.getElementsByClassName("ThumbDownButton")[0].click();
       }
-    } else {
-      if (document.getElementsByClassName("Tuner__Control__ThumbUp__Button--active").length > 0) {
-        document.getElementsByClassName("ThumbUpButton ")[0].click();
-      } else if (
-        document.getElementsByClassName("Tuner__Control__ThumbDown__Button--active").length > 0
-      ) {
-        document.getElementsByClassName("ThumbDownButton")[0].click();
-      }
+    } else if (
+      document.getElementsByClassName("Tuner__Control__ThumbUp__Button--active")
+        .length
+    ) {
+      document.getElementsByClassName("ThumbUpButton ")[0].click();
+    } else if (
+      document.getElementsByClassName(
+        "Tuner__Control__ThumbDown__Button--active"
+      ).length
+    ) {
+      document.getElementsByClassName("ThumbDownButton")[0].click();
     }
   };
 }

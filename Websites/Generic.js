@@ -1,7 +1,7 @@
 //This is a generic handler for unsupported sites.
 //This will only run if given permissions on all sites.
 //Note: Having an image is not guaranteed
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
+/* import-globals-from ../WebNowPlaying.js */
 
 var possibleArtist = "";
 
@@ -28,7 +28,7 @@ function addToChangedList(source) {
 
 function updateCurrentElement() {
   //If any elements have been updated since last check
-  if (elements.length > 0) {
+  if (elements.length) {
     //If last used element does not exist in array select a new one
     if (elements.indexOf(element) < 0) {
       //Update element to the element that came in most recently
@@ -65,7 +65,7 @@ function updateCurrentElement() {
 function setupElementEvents() {
   for (var i = 0; i < document.getElementsByTagName("video").length; i++) {
     if (document.getElementsByTagName("video")[i].ontimeupdate === null) {
-      document.getElementsByTagName("video")[i].ontimeupdate = function () {
+      document.getElementsByTagName("video")[i].ontimeupdate = function() {
         addToChangedList(this);
       };
     }
@@ -73,7 +73,7 @@ function setupElementEvents() {
   for (var i = 0; i < document.getElementsByTagName("audio").length; i++) {
     //@TODO may have to not check if null in case someone else has a time update event already (Although in those cases I may break their site)
     if (document.getElementsByTagName("audio")[i].ontimeupdate === null) {
-      document.getElementsByTagName("audio")[i].ontimeupdate = function () {
+      document.getElementsByTagName("audio")[i].ontimeupdate = function() {
         addToChangedList(this);
       };
     }
@@ -84,21 +84,21 @@ function setup() {
   var genericInfoHandler = createNewMusicInfo();
   //@TODO possibly monitor all audio and video tags in a page for changes
 
-  genericInfoHandler.player = function () {
+  genericInfoHandler.player = function() {
     return document.domain;
   };
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
-  genericInfoHandler.readyCheck = function () {
+  genericInfoHandler.readyCheck = function() {
     //Most elements will already have events attached but this will add it to any new elements
     setupElementEvents();
     return element !== undefined && element !== null && element.duration > 0;
   };
 
-  genericInfoHandler.state = function () {
+  genericInfoHandler.state = function() {
     return element.paused ? 2 : 1;
   };
-  genericInfoHandler.title = function () {
+  genericInfoHandler.title = function() {
     var title = "";
     //@TODO Send all of these to the artist guesser?
     if (document.querySelector('meta[property="og:title"]') !== null) {
@@ -146,8 +146,8 @@ function setup() {
 
     return title;
   };
-  genericInfoHandler.artist = function () {
-    if (possibleArtist.length > 0) {
+  genericInfoHandler.artist = function() {
+    if (possibleArtist.length) {
       return possibleArtist;
     }
 
@@ -161,7 +161,7 @@ function setup() {
     }
     return temp;
   };
-  genericInfoHandler.album = function () {
+  genericInfoHandler.album = function() {
     var temp = document.domain;
     temp = temp.substring(0, temp.lastIndexOf("."));
     temp = temp.substring(temp.lastIndexOf(".") + 1);
@@ -172,30 +172,28 @@ function setup() {
     }
     return temp;
   };
-  genericInfoHandler.cover = function () {
+  genericInfoHandler.cover = function() {
     if (element.poster !== undefined) {
       return element.poster;
     }
     try {
       return document.querySelector('meta[property="og:image"]').content;
-    } catch (e) {
-      return;
-    }
+    } catch (e) {}
   };
-  genericInfoHandler.duration = function () {
+  genericInfoHandler.duration = function() {
     return element.duration;
   };
-  genericInfoHandler.position = function () {
+  genericInfoHandler.position = function() {
     return element.currentTime;
   };
-  genericInfoHandler.volume = function () {
+  genericInfoHandler.volume = function() {
     if (!element.muted) {
       return element.volume;
     }
     return 0;
   };
   genericInfoHandler.rating = null;
-  genericInfoHandler.repeat = function () {
+  genericInfoHandler.repeat = function() {
     return element.loop ? 2 : 0;
   };
   genericInfoHandler.shuffle = null;
@@ -203,27 +201,27 @@ function setup() {
   var genericEventHandler = createNewMusicEventHandler();
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
-  genericEventHandler.readyCheck = function () {
+  genericEventHandler.readyCheck = function() {
     return element !== null;
   };
 
-  genericEventHandler.playpause = function () {
+  genericEventHandler.playpause = function() {
     if (element.paused) {
       element.play();
     } else {
       element.pause();
     }
   };
-  genericEventHandler.next = function () {
+  genericEventHandler.next = function() {
     element.currentTime = element.duration;
   };
-  genericEventHandler.previous = function () {
+  genericEventHandler.previous = function() {
     element.currentTime = 0;
   };
-  genericEventHandler.progressSeconds = function (position) {
+  genericEventHandler.progressSeconds = function(position) {
     element.currentTime = position;
   };
-  genericEventHandler.volume = function (volume) {
+  genericEventHandler.volume = function(volume) {
     if (element.muted && volume > 0) {
       element.muted = false;
     } else if (volume == 0) {
@@ -231,7 +229,7 @@ function setup() {
     }
     element.volume = volume;
   };
-  genericEventHandler.repeat = function () {
+  genericEventHandler.repeat = function() {
     element.loop = !element.loop;
   };
   genericEventHandler.shuffle = null;
@@ -244,7 +242,7 @@ function setup() {
 setupElementEvents();
 
 //This will update which element is selected to display
-setInterval(function () {
+setInterval(function() {
   updateCurrentElement();
 }, 1000);
 
@@ -252,12 +250,12 @@ setInterval(function () {
 // Use default value color = 'red' and likesColor = true.
 chrome.storage.sync.get(
   {
-    "doGeneric": false,
-    "useGenericList": false,
-    "whitelistOrBlacklist": "whitelist",
-    "genericList": ["streamable.com", "www.adultswim.com"],
+    doGeneric: false,
+    useGenericList: false,
+    whitelistOrBlacklist: "whitelist",
+    genericList: ["streamable.com", "www.adultswim.com"],
   },
-  function (items) {
+  function(items) {
     //If set to use generic
     if (items.doGeneric) {
       if (items.useGenericList) {

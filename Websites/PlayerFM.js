@@ -1,42 +1,51 @@
 //Adds support for PlayerFM
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
+/* import-globals-from ../WebNowPlaying.js */
 
 function setup() {
   const playerInfoHandler = createNewMusicInfo();
 
-  playerInfoHandler.player = function () {
+  playerInfoHandler.player = function() {
     return "PlayerFM";
   };
 
-  playerInfoHandler.readyCheck = function () {
+  playerInfoHandler.readyCheck = function() {
     return (
-      document.getElementsByClassName("current-series-link").length > 0 &&
-      document.getElementsByClassName("current-series-link")[0].innerText.length > 0
+      !!document.getElementsByClassName("current-series-link").length &&
+      !!document.getElementsByClassName("current-series-link")[0].innerText
+        .length
     );
   };
 
-  playerInfoHandler.state = function () {
-    return document.getElementsByClassName("control pause")[0].style.display === "" ? 1 : 2;
+  playerInfoHandler.state = function() {
+    return document.getElementsByClassName("control pause")[0].style.display ===
+      ""
+      ? 1
+      : 2;
   };
 
-  playerInfoHandler.title = function () {
+  playerInfoHandler.title = function() {
     return document.getElementsByClassName("current-episode-link")[0].innerText;
   };
 
-  playerInfoHandler.artist = function () {
+  playerInfoHandler.artist = function() {
     return document.getElementsByClassName("current-series-link")[0].innerText;
   };
 
-  playerInfoHandler.cover = function () {
-    const coverSmall = document.getElementsByClassName("thumb")[0].children[0].getAttribute("src");
+  playerInfoHandler.cover = function() {
+    const coverSmall = document
+      .getElementsByClassName("thumb")[0]
+      .children[0].getAttribute("src");
     return coverSmall.replace("128", "256");
   };
 
-  playerInfoHandler.durationString = function () {
+  playerInfoHandler.durationString = function() {
     // Player.fm displayes duration as "time remaining" so we have to do some math to find the actual duration
     // for the currently playing media.
-    const remainingDuration = document.getElementsByClassName("time-remaining")[0].innerText;
-    const currentPosition = document.getElementsByClassName("time-elapsed")[0].innerText;
+    const remainingDuration = document.getElementsByClassName(
+      "time-remaining"
+    )[0].innerText;
+    const currentPosition = document.getElementsByClassName("time-elapsed")[0]
+      .innerText;
 
     const times = [0, 0, 0];
     const max = times.length;
@@ -72,41 +81,51 @@ function setup() {
     }
 
     return (
-      ("0" + hours).slice(-2) + ":" + ("0" + minutes).slice(-2) + ":" + ("0" + seconds).slice(-2)
+      ("0" + hours).slice(-2) +
+      ":" +
+      ("0" + minutes).slice(-2) +
+      ":" +
+      ("0" + seconds).slice(-2)
     );
   };
 
-  playerInfoHandler.positionString = function () {
+  playerInfoHandler.positionString = function() {
     return document.getElementsByClassName("time-elapsed")[0].innerText;
   };
 
   const playerEventHandler = createNewMusicEventHandler();
 
-  playerEventHandler.readyCheck = function () {
+  playerEventHandler.readyCheck = function() {
     return (
-      document.getElementsByClassName("current-series-link").length > 0 &&
-      document.getElementsByClassName("current-series-link")[0].innerText.length > 0
+      !!document.getElementsByClassName("current-series-link").length &&
+      !!document.getElementsByClassName("current-series-link")[0].innerText
+        .length
     );
   };
 
-  playerEventHandler.playpause = function () {
-    if (document.getElementsByClassName("control play")[0].style.display === "none") {
+  playerEventHandler.playpause = function() {
+    if (
+      document.getElementsByClassName("control play")[0].style.display ===
+      "none"
+    ) {
       document.getElementsByClassName("control pause")[0].click();
     } else {
       document.getElementsByClassName("control play")[0].click();
     }
   };
 
-  playerEventHandler.next = function () {
+  playerEventHandler.next = function() {
     document.getElementsByClassName("control fast-forward")[0].click();
   };
 
-  playerEventHandler.previous = function () {
+  playerEventHandler.previous = function() {
     document.getElementsByClassName("control fast-backward")[0].click();
   };
 
-  playerEventHandler.progress = function (progress) {
-    const loc = document.getElementsByClassName("progress-base")[0].getBoundingClientRect();
+  playerEventHandler.progress = function(progress) {
+    const loc = document
+      .getElementsByClassName("progress-base")[0]
+      .getBoundingClientRect();
     progress *= loc.width;
 
     const a = document.getElementsByClassName("progress-base")[0];

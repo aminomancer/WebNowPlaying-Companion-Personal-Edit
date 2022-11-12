@@ -1,12 +1,12 @@
 //Adds support for Plex
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
+/* import-globals-from ../WebNowPlaying.js */
 
 var element;
 var lastCover = null;
 
 function blobToDataURL(blob) {
   var a = new FileReader();
-  a.onload = function (e) {
+  a.onload = function(e) {
     lastCover = e.target.result;
   };
   a.readAsDataURL(blob);
@@ -15,12 +15,12 @@ function blobToDataURL(blob) {
 function setup() {
   var plexInfoHandler = createNewMusicInfo();
 
-  plexInfoHandler.player = function () {
+  plexInfoHandler.player = function() {
     return "Plex";
   };
 
-  plexInfoHandler.readyCheck = function () {
-    if (document.getElementsByTagName("audio").length > 0) {
+  plexInfoHandler.readyCheck = function() {
+    if (document.getElementsByTagName("audio").length) {
       for (var i = 0; i < document.getElementsByTagName("audio").length; i++) {
         if (document.getElementsByTagName("audio")[i].duration > 0) {
           element = document.getElementsByTagName("audio")[i];
@@ -32,34 +32,39 @@ function setup() {
     return element !== undefined && element !== null && element.duration > 0;
   };
 
-  plexInfoHandler.state = function () {
+  plexInfoHandler.state = function() {
     return element.paused ? 2 : 1;
   };
-  plexInfoHandler.title = function () {
-    return document.querySelector("*[class*=AudioVideoPlayerControlsMetadata-titlesContainer]")
-      .children[0].innerText;
+  plexInfoHandler.title = function() {
+    return document.querySelector(
+      "*[class*=AudioVideoPlayerControlsMetadata-titlesContainer]"
+    ).children[0].innerText;
   };
-  plexInfoHandler.artist = function () {
-    return document.querySelector("*[class*=AudioVideoPlayerControlsMetadata-titlesContainer]")
-      .children[1].children[0].innerText;
+  plexInfoHandler.artist = function() {
+    return document.querySelector(
+      "*[class*=AudioVideoPlayerControlsMetadata-titlesContainer]"
+    ).children[1].children[0].innerText;
   };
-  plexInfoHandler.album = function () {
-    return document.querySelector("*[class*=AudioVideoPlayerControlsMetadata-titlesContainer]")
-      .children[1].children[2].innerText;
+  plexInfoHandler.album = function() {
+    return document.querySelector(
+      "*[class*=AudioVideoPlayerControlsMetadata-titlesContainer]"
+    ).children[1].children[2].innerText;
   };
-  plexInfoHandler.cover = function () {
+  plexInfoHandler.cover = function() {
     //Plex cover is really low res, and due to their obfuscation and the fact that users can use a pin code
     //There is little I can do about it, and even if I could the highest res is only 187x187
     //Also fuck plex for putting this behind a blob
 
-    var cover = document.querySelector("*[class*=AudioVideoPlayerControlsMetadata-cardContainer]")
-      .children[0].children[0].children[0].children[0].children[0].style.backgroundImage;
+    var cover = document.querySelector(
+      "*[class*=AudioVideoPlayerControlsMetadata-cardContainer]"
+    ).children[0].children[0].children[0].children[0].children[0].style
+      .backgroundImage;
     cover = cover.substring(cover.indexOf("(") + 2, cover.indexOf(")") - 1);
 
     var xhr = new XMLHttpRequest();
     xhr.open("GET", cover, true);
     xhr.responseType = "blob";
-    xhr.onload = function (e) {
+    xhr.onload = function(e) {
       if (this.status == 200) {
         var myBlob = this.response;
         blobToDataURL(myBlob);
@@ -69,21 +74,21 @@ function setup() {
     //Last cover is updated in blob to data url
     return lastCover;
   };
-  plexInfoHandler.duration = function () {
+  plexInfoHandler.duration = function() {
     return element.duration;
   };
-  plexInfoHandler.position = function () {
+  plexInfoHandler.position = function() {
     return element.currentTime;
   };
-  plexInfoHandler.volume = function () {
+  plexInfoHandler.volume = function() {
     return element.volume;
   };
-  plexInfoHandler.rating = function () {
+  plexInfoHandler.rating = function() {
     return document
       .querySelector("*[class*=StarRating-slider]")
       .children[1].children[0].getAttribute("aria-valuenow");
   };
-  plexInfoHandler.repeat = function () {
+  plexInfoHandler.repeat = function() {
     if (
       document
         .querySelector("*[class*=AudioVideoPlayerControls-buttonGroupCenter]")
@@ -100,7 +105,7 @@ function setup() {
     }
     return 0;
   };
-  plexInfoHandler.shuffle = function () {
+  plexInfoHandler.shuffle = function() {
     if (
       document
         .querySelector("*[class*=AudioVideoPlayerControls-buttonGroupCenter]")
@@ -114,13 +119,14 @@ function setup() {
   var plexEventHandler = createNewMusicEventHandler();
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
-  plexEventHandler.readyCheck = function () {
+  plexEventHandler.readyCheck = function() {
     return element !== undefined && element !== null && element.duration > 0;
   };
 
-  plexEventHandler.playpause = function () {
-    var a = document.querySelector("*[class*=AudioVideoPlayerControls-buttonGroupCenter]")
-      .children[2];
+  plexEventHandler.playpause = function() {
+    var a = document.querySelector(
+      "*[class*=AudioVideoPlayerControls-buttonGroupCenter]"
+    ).children[2];
     var e = document.createEvent("MouseEvents");
 
     e.initMouseEvent(
@@ -160,9 +166,10 @@ function setup() {
     );
     a.dispatchEvent(e);
   };
-  plexEventHandler.next = function () {
-    var a = document.querySelector("*[class*=AudioVideoPlayerControls-buttonGroupCenter]")
-      .children[3];
+  plexEventHandler.next = function() {
+    var a = document.querySelector(
+      "*[class*=AudioVideoPlayerControls-buttonGroupCenter]"
+    ).children[3];
     var e = document.createEvent("MouseEvents");
 
     e.initMouseEvent(
@@ -202,9 +209,10 @@ function setup() {
     );
     a.dispatchEvent(e);
   };
-  plexEventHandler.previous = function () {
-    var a = document.querySelector("*[class*=AudioVideoPlayerControls-buttonGroupCenter]")
-      .children[1];
+  plexEventHandler.previous = function() {
+    var a = document.querySelector(
+      "*[class*=AudioVideoPlayerControls-buttonGroupCenter]"
+    ).children[1];
     var e = document.createEvent("MouseEvents");
 
     e.initMouseEvent(
@@ -244,10 +252,10 @@ function setup() {
     );
     a.dispatchEvent(e);
   };
-  plexEventHandler.progressSeconds = function (position) {
+  plexEventHandler.progressSeconds = function(position) {
     element.currentTime = position;
   };
-  plexEventHandler.volume = function (volume) {
+  plexEventHandler.volume = function(volume) {
     if (element.muted && volume > 0) {
       element.muted = false;
     } else if (volume == 0) {
@@ -255,9 +263,10 @@ function setup() {
     }
     element.volume = volume;
   };
-  plexEventHandler.repeat = function () {
-    var a = document.querySelector("*[class*=AudioVideoPlayerControls-buttonGroupCenter]")
-      .children[0];
+  plexEventHandler.repeat = function() {
+    var a = document.querySelector(
+      "*[class*=AudioVideoPlayerControls-buttonGroupCenter]"
+    ).children[0];
     var e = document.createEvent("MouseEvents");
 
     e.initMouseEvent(
@@ -297,9 +306,10 @@ function setup() {
     );
     a.dispatchEvent(e);
   };
-  plexEventHandler.shuffle = function () {
-    var a = document.querySelector("*[class*=AudioVideoPlayerControls-buttonGroupCenter]")
-      .children[4];
+  plexEventHandler.shuffle = function() {
+    var a = document.querySelector(
+      "*[class*=AudioVideoPlayerControls-buttonGroupCenter]"
+    ).children[4];
     var e = document.createEvent("MouseEvents");
 
     e.initMouseEvent(
@@ -339,7 +349,7 @@ function setup() {
     );
     a.dispatchEvent(e);
   };
-  plexEventHandler.toggleThumbsUp = function () {
+  plexEventHandler.toggleThumbsUp = function() {
     var rating = 5;
     //If already rated 5 stars
     if (
@@ -395,7 +405,7 @@ function setup() {
     );
     a.dispatchEvent(e);
   };
-  plexEventHandler.toggleThumbsDown = function () {
+  plexEventHandler.toggleThumbsDown = function() {
     var rating = 1;
     //If already rated 1 stars
     if (
@@ -451,7 +461,7 @@ function setup() {
     );
     a.dispatchEvent(e);
   };
-  plexEventHandler.rating = function (rating) {
+  plexEventHandler.rating = function(rating) {
     //Plex does not allow reseting ratings as far is I know
     if (rating == 0) {
       rating = 3;

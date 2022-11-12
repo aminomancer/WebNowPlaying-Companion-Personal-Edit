@@ -1,5 +1,5 @@
 //Adds support for Jet Set Radio Live
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
+/* import-globals-from ../WebNowPlaying.js */
 
 let songInfoEl;
 let player;
@@ -8,7 +8,7 @@ let cover;
 function _wallpaperCanvas(bgUrl, cb) {
   const img = new Image();
   img.setAttribute("crossOrigin", "anonymous");
-  img.onload = function () {
+  img.onload = function() {
     const canvas = document.createElement("canvas");
     canvas.width = this.width;
     canvas.height = this.height;
@@ -22,16 +22,20 @@ function _wallpaperCanvas(bgUrl, cb) {
 
 function generateCover(bg) {
   if (typeof bg === "string") {
-    _wallpaperCanvas(bg, function (wall) {
+    _wallpaperCanvas(bg, function(wall) {
       const img = new Image();
       img.setAttribute("crossOrigin", "anonymous");
-      img.onload = function () {
+      img.onload = function() {
         const canvas = document.createElement("canvas");
         canvas.width = this.width;
         canvas.height = this.height;
 
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(wall, (canvas.width - wall.width) * 0.5, (canvas.height - wall.height) * 0.5);
+        ctx.drawImage(
+          wall,
+          (canvas.width - wall.width) * 0.5,
+          (canvas.height - wall.height) * 0.5
+        );
         ctx.drawImage(this, 0, 0);
         cover = canvas.toDataURL("image/png");
       };
@@ -40,13 +44,15 @@ function generateCover(bg) {
   } else {
     const img = new Image();
     img.setAttribute("crossOrigin", "anonymous");
-    img.onload = function () {
+    img.onload = function() {
       const canvas = document.createElement("canvas");
       canvas.width = this.width;
       canvas.height = this.height;
 
       const ctx = canvas.getContext("2d");
-      ctx.fillStyle = document.querySelector("#chameleonWallpaper").style.backgroundColor;
+      ctx.fillStyle = document.querySelector(
+        "#chameleonWallpaper"
+      ).style.backgroundColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(this, 0, 0);
       cover = canvas.toDataURL("image/png");
@@ -72,47 +78,49 @@ function getTrackInfo() {
 function setup() {
   var jsrLiveInfoHandler = createNewMusicInfo();
 
-  jsrLiveInfoHandler.player = function () {
+  jsrLiveInfoHandler.player = function() {
     return "Jet Set Radio Live";
   };
 
-  jsrLiveInfoHandler.readyCheck = function () {
+  jsrLiveInfoHandler.readyCheck = function() {
     player = document.querySelector("#audioPlayer");
     songInfoEl = document.querySelector("#programInformationText");
-    return songInfoEl && songInfoEl.innerHTML.length > 0;
+    return songInfoEl && !!songInfoEl.innerHTML.length;
   };
 
-  jsrLiveInfoHandler.state = function () {
+  jsrLiveInfoHandler.state = function() {
     return player.paused ? 2 : 1;
   };
-  jsrLiveInfoHandler.title = function () {
+  jsrLiveInfoHandler.title = function() {
     const text = songInfoEl.textContent;
     if (text == "Bump") return "Bump";
 
     return getTrackInfo()[1];
   };
-  jsrLiveInfoHandler.artist = function () {
+  jsrLiveInfoHandler.artist = function() {
     const text = songInfoEl.textContent;
     if (text == "Bump") return "DJ Professor K";
 
     return getTrackInfo()[0];
   };
-  jsrLiveInfoHandler.cover = function () {
+  jsrLiveInfoHandler.cover = function() {
     return cover;
   };
-  jsrLiveInfoHandler.duration = function () {
+  jsrLiveInfoHandler.duration = function() {
     return player.duration;
   };
-  jsrLiveInfoHandler.position = function () {
+  jsrLiveInfoHandler.position = function() {
     return player.currentTime;
   };
-  jsrLiveInfoHandler.volume = function () {
+  jsrLiveInfoHandler.volume = function() {
     return player.volume;
   };
-  jsrLiveInfoHandler.shuffle = function () {
+  jsrLiveInfoHandler.shuffle = function() {
     const shuffleBtn = document.querySelector("#shuffleButton");
     if (shuffleBtn) {
-      return document.querySelector("#shuffleButton").style.opacity == "1" ? 1 : 0;
+      return document.querySelector("#shuffleButton").style.opacity == "1"
+        ? 1
+        : 0;
     }
     return 0;
   };
@@ -121,26 +129,32 @@ function setup() {
 
   jsrLiveEventHandler.readyCheck = jsrLiveInfoHandler.readyCheck;
 
-  jsrLiveEventHandler.playpause = function () {
+  jsrLiveEventHandler.playpause = function() {
     if (player.paused) {
-      document.querySelector("#playTrackButton").dispatchEvent(new Event("mousedown"));
+      document
+        .querySelector("#playTrackButton")
+        .dispatchEvent(new Event("mousedown"));
     } else {
-      document.querySelector("#pauseTrackButton").dispatchEvent(new Event("mousedown"));
+      document
+        .querySelector("#pauseTrackButton")
+        .dispatchEvent(new Event("mousedown"));
     }
   };
-  jsrLiveEventHandler.next = function () {
-    document.querySelector("#nextTrackButton").dispatchEvent(new Event("mousedown"));
+  jsrLiveEventHandler.next = function() {
+    document
+      .querySelector("#nextTrackButton")
+      .dispatchEvent(new Event("mousedown"));
   };
-  jsrLiveEventHandler.shuffle = function () {
+  jsrLiveEventHandler.shuffle = function() {
     const shuffleBtn = document.querySelector("#shuffleButton");
     if (shuffleBtn) {
       shuffleBtn.dispatchEvent(new Event("mousedown"));
     }
   };
-  jsrLiveEventHandler.progressSeconds = function (position) {
+  jsrLiveEventHandler.progressSeconds = function(position) {
     player.currentTime = position;
   };
-  jsrLiveEventHandler.volume = function (volume) {
+  jsrLiveEventHandler.volume = function(volume) {
     if (player.muted && volume > 0) {
       player.muted = false;
     } else if (volume == 0) {
@@ -153,9 +167,11 @@ function setup() {
 // Only generate cover when station image changes
 document.querySelector("#graffitiSoul").addEventListener("load", generateCover);
 // ...and again when the new background is eventually loaded
-document.querySelector("#wallpaperImageTop").addEventListener("load", function (evt) {
-  generateCover(evt.target.src);
-});
+document
+  .querySelector("#wallpaperImageTop")
+  .addEventListener("load", function(evt) {
+    generateCover(evt.target.src);
+  });
 
 setup();
 init();

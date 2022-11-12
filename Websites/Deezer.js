@@ -1,5 +1,5 @@
 //Adds support for Deezer
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString capitalize*/
+/* import-globals-from ../WebNowPlaying.js */
 
 var lastAlbumURL = "";
 var lastKnownAlbum = "";
@@ -7,77 +7,93 @@ var lastKnownAlbum = "";
 function setup() {
   var deezerInfoHandler = createNewMusicInfo();
 
-  deezerInfoHandler.player = function () {
+  deezerInfoHandler.player = function() {
     return "Deezer";
   };
 
-  deezerInfoHandler.readyCheck = function () {
-    return document.getElementsByClassName("track-link").length > 0;
+  deezerInfoHandler.readyCheck = function() {
+    return !!document.getElementsByClassName("track-link").length;
   };
 
-  deezerInfoHandler.state = function () {
+  deezerInfoHandler.state = function() {
     return document
       .getElementsByClassName("player-controls")[0]
-      .children[0].children[2].children[0].children[0].className.baseVal.includes("pause")
+      .children[0].children[2].children[0].children[0].className.baseVal.includes(
+        "pause"
+      )
       ? 1
       : 2;
   };
-  deezerInfoHandler.title = function () {
+  deezerInfoHandler.title = function() {
     return document.getElementsByClassName("track-link")[0].innerText;
   };
-  deezerInfoHandler.artist = function () {
+  deezerInfoHandler.artist = function() {
     return document.getElementsByClassName("track-link")[1].innerText;
   };
-  deezerInfoHandler.album = function () {
+  deezerInfoHandler.album = function() {
     //Check if album URL has changed
-    if (lastAlbumURL !== document.getElementsByClassName("track-link")[0].href) {
+    if (
+      lastAlbumURL !== document.getElementsByClassName("track-link")[0].href
+    ) {
       //If changed set to new URL and update album name
       lastAlbumURL = document.getElementsByClassName("track-link")[0].href;
 
       var ajaxReq = new XMLHttpRequest();
-      ajaxReq.onreadystatechange = function () {
+      ajaxReq.onreadystatechange = function() {
         if (ajaxReq.readyState == 4) {
-          lastKnownAlbum = ajaxReq.response.querySelector('meta[name="twitter:title"]').content;
+          lastKnownAlbum = ajaxReq.response.querySelector(
+            'meta[name="twitter:title"]'
+          ).content;
         }
       };
       ajaxReq.responseType = "document";
 
-      ajaxReq.open("get", document.getElementsByClassName("track-link")[0].href);
+      ajaxReq.open(
+        "get",
+        document.getElementsByClassName("track-link")[0].href
+      );
       ajaxReq.send();
     }
 
     return lastKnownAlbum;
   };
-  deezerInfoHandler.cover = function () {
+  deezerInfoHandler.cover = function() {
     return document
       .getElementsByClassName("queuelist")[0]
       .children[0].children[0].children[0].src.replace("28x28", "1200x1200");
   };
-  deezerInfoHandler.durationString = function () {
+  deezerInfoHandler.durationString = function() {
     return document.getElementsByClassName("slider-counter-max")[0].innerText;
   };
-  deezerInfoHandler.positionString = function () {
-    return document.getElementsByClassName("slider-counter-current")[0].innerText;
+  deezerInfoHandler.positionString = function() {
+    return document.getElementsByClassName("slider-counter-current")[0]
+      .innerText;
   };
   //Deezer has a dumb new volume system
   deezerInfoHandler.volume = null;
-  deezerInfoHandler.rating = function () {
+  deezerInfoHandler.rating = function() {
     for (
       var i = 0;
-      i < document.getElementsByClassName("track-actions")[0].children[0].children.length;
+      i <
+      document.getElementsByClassName("track-actions")[0].children[0].children
+        .length;
       i++
     ) {
       if (
-        document.getElementsByClassName("track-actions")[0].children[0].children[i].children[0]
-          .children[0].tagName === "svg" &&
+        document.getElementsByClassName("track-actions")[0].children[0]
+          .children[i].children[0].children[0].tagName === "svg" &&
         document
           .getElementsByClassName("track-actions")[0]
-          .children[0].children[i].children[0].children[0].className.baseVal.includes("love")
+          .children[0].children[
+            i
+          ].children[0].children[0].className.baseVal.includes("love")
       ) {
         if (
           document
             .getElementsByClassName("track-actions")[0]
-            .children[0].children[i].children[0].children[0].className.baseVal.includes("active")
+            .children[0].children[
+              i
+            ].children[0].children[0].className.baseVal.includes("active")
         ) {
           return 5;
         }
@@ -85,10 +101,9 @@ function setup() {
     }
     return 0;
   };
-  deezerInfoHandler.repeat = function () {
-    var childCount =
-      document.getElementsByClassName("player-options")[0].children[0].children[0].children[0]
-        .childElementCount;
+  deezerInfoHandler.repeat = function() {
+    var childCount = document.getElementsByClassName("player-options")[0]
+      .children[0].children[0].children[0].childElementCount;
     if (
       document
         .getElementsByClassName("player-options")[0]
@@ -109,10 +124,9 @@ function setup() {
     }
     return 0;
   };
-  deezerInfoHandler.shuffle = function () {
-    var childCount =
-      document.getElementsByClassName("player-options")[0].children[0].children[0].children[0]
-        .childElementCount;
+  deezerInfoHandler.shuffle = function() {
+    var childCount = document.getElementsByClassName("player-options")[0]
+      .children[0].children[0].children[0].childElementCount;
     if (
       document
         .getElementsByClassName("player-options")[0]
@@ -124,8 +138,8 @@ function setup() {
     }
     //Return shuffle true if using flow or a radio station
     else if (
-      document.getElementsByClassName("player-options")[0].children[0].children[0].children[0]
-        .children[childCount - 3].children[0].disabled
+      document.getElementsByClassName("player-options")[0].children[0]
+        .children[0].children[0].children[childCount - 3].children[0].disabled
     ) {
       return 1;
     }
@@ -135,21 +149,21 @@ function setup() {
   var deezerEventHandler = createNewMusicEventHandler();
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
-  deezerEventHandler.readyCheck = function () {
-    return document.getElementsByClassName("track-link").length > 0;
+  deezerEventHandler.readyCheck = function() {
+    return !!document.getElementsByClassName("track-link").length;
   };
 
-  deezerEventHandler.playpause = function () {
+  deezerEventHandler.playpause = function() {
     document
       .getElementsByClassName("player-controls")[0]
       .children[0].children[2].children[0].click();
   };
-  deezerEventHandler.next = function () {
+  deezerEventHandler.next = function() {
     document
       .getElementsByClassName("player-controls")[0]
       .children[0].children[4].children[0].children[0].click();
   };
-  deezerEventHandler.previous = function () {
+  deezerEventHandler.previous = function() {
     document
       .getElementsByClassName("player-controls")[0]
       .children[0].children[0].children[0].children[0].click();
@@ -204,36 +218,42 @@ function setup() {
   //	a.dispatchEvent(e);
   //};
   deezerEventHandler.volume = null;
-  deezerEventHandler.repeat = function () {
-    var childCount =
-      document.getElementsByClassName("player-options")[0].children[0].children[0].children[0]
-        .childElementCount;
+  deezerEventHandler.repeat = function() {
+    var childCount = document.getElementsByClassName("player-options")[0]
+      .children[0].children[0].children[0].childElementCount;
     document
       .getElementsByClassName("player-options")[0]
-      .children[0].children[0].children[0].children[childCount - 4].children[0].click();
+      .children[0].children[0].children[0].children[
+        childCount - 4
+      ].children[0].click();
   };
-  deezerEventHandler.shuffle = function () {
-    var childCount =
-      document.getElementsByClassName("player-options")[0].children[0].children[0].children[0]
-        .childElementCount;
+  deezerEventHandler.shuffle = function() {
+    var childCount = document.getElementsByClassName("player-options")[0]
+      .children[0].children[0].children[0].childElementCount;
     document
       .getElementsByClassName("player-options")[0]
-      .children[0].children[0].children[0].children[childCount - 3].children[0].click();
+      .children[0].children[0].children[0].children[
+        childCount - 3
+      ].children[0].click();
   };
 
   //Yup Deezers rating is still dumb
-  deezerEventHandler.toggleThumbsUp = function () {
+  deezerEventHandler.toggleThumbsUp = function() {
     for (
       var i = 0;
-      i < document.getElementsByClassName("track-actions")[0].children[0].children.length;
+      i <
+      document.getElementsByClassName("track-actions")[0].children[0].children
+        .length;
       i++
     ) {
       if (
-        document.getElementsByClassName("track-actions")[0].children[0].children[i].children[0]
-          .children[0].tagName === "svg" &&
+        document.getElementsByClassName("track-actions")[0].children[0]
+          .children[i].children[0].children[0].tagName === "svg" &&
         document
           .getElementsByClassName("track-actions")[0]
-          .children[0].children[i].children[0].children[0].className.baseVal.includes("love")
+          .children[0].children[
+            i
+          ].children[0].children[0].className.baseVal.includes("love")
       ) {
         document
           .getElementsByClassName("track-actions")[0]
@@ -242,18 +262,22 @@ function setup() {
     }
   };
   deezerEventHandler.toggleThumbsDown = null;
-  deezerEventHandler.rating = function (rating) {
+  deezerEventHandler.rating = function(rating) {
     for (
       var i = 0;
-      i < document.getElementsByClassName("track-actions")[0].children[0].children.length;
+      i <
+      document.getElementsByClassName("track-actions")[0].children[0].children
+        .length;
       i++
     ) {
       if (
-        document.getElementsByClassName("track-actions")[0].children[0].children[i].children[0]
-          .children[0].tagName === "svg" &&
+        document.getElementsByClassName("track-actions")[0].children[0]
+          .children[i].children[0].children[0].tagName === "svg" &&
         document
           .getElementsByClassName("track-actions")[0]
-          .children[0].children[i].children[0].children[0].className.baseVal.includes("love")
+          .children[0].children[
+            i
+          ].children[0].children[0].className.baseVal.includes("love")
       ) {
         //We are rating this high
         if (rating > 3) {
@@ -261,7 +285,9 @@ function setup() {
           if (
             !document
               .getElementsByClassName("track-actions")[0]
-              .children[0].children[i].children[0].children[0].className.baseVal.includes("active")
+              .children[0].children[
+                i
+              ].children[0].children[0].className.baseVal.includes("active")
           ) {
             document
               .getElementsByClassName("track-actions")[0]
@@ -274,7 +300,9 @@ function setup() {
           if (
             document
               .getElementsByClassName("track-actions")[0]
-              .children[0].children[i].children[0].children[0].className.baseVal.includes("active")
+              .children[0].children[
+                i
+              ].children[0].children[0].className.baseVal.includes("active")
           ) {
             document
               .getElementsByClassName("track-actions")[0]

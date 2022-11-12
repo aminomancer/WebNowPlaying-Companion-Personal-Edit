@@ -1,4 +1,5 @@
 # Web Now Playing Companion Extension - Unofficial Updated Fork
+
 [Source code](https://github.com/shmediaproductions/WebNowPlaying-Companion-Personal-Edit/releases)
 The browser extension required to use the [WebNowPlaying plugin](https://github.com/tjhrulz/WebNowPlaying-BrowserExtension) for [Rainmeter](https://www.rainmeter.net/). This is an unnoficial fork of the original companion extension, which has been modified to enhance the experience on YouTube and Netflix and to update the site scripts more regularly.
 
@@ -21,6 +22,7 @@ The original extension can be found in both the [Chrome Web Store](https://chrom
 #### If you would like to support this extension please check out the original author's [patreon](https://www.patreon.com/tjhrulz)
 
 ### List of supported sites:
+
 - YouTube (Both new and old layouts)
 - Embedded YouTube videos/playlists on any webpage
 - Netflix
@@ -34,4 +36,3 @@ The original extension can be found in both the [Chrome Web Store](https://chrom
 - Plex (Music)
 - PocketCasts
 - Generic site support that can be turned on in the settings
-

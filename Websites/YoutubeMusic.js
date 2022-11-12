@@ -1,5 +1,5 @@
 //Adds support for Youtube Music
-/*global init createNewMusicInfo createNewMusicEventHandler convertTimeToString*/
+/* import-globals-from ../WebNowPlaying.js */
 
 function setup() {
   let lastImgVideoID = "";
@@ -7,38 +7,49 @@ function setup() {
 
   let ymInfoHandler = createNewMusicInfo();
 
-  ymInfoHandler.player = function () {
+  ymInfoHandler.player = function() {
     return "YouTube Music";
   };
 
-  ymInfoHandler.readyCheck = function () {
+  ymInfoHandler.readyCheck = function() {
     if (
-      document.getElementsByTagName("video").length > 0 &&
-      document.getElementsByClassName("title ytmusic-player-bar")[0].innerText.length > 0
+      document.getElementsByTagName("video").length &&
+      document.getElementsByClassName("title ytmusic-player-bar")[0].innerText
+        .length
     ) {
       return true;
     }
     return false;
   };
 
-  ymInfoHandler.state = function () {
+  ymInfoHandler.state = function() {
     return document.getElementsByTagName("video")[0].paused ? 2 : 1;
   };
-  ymInfoHandler.title = function () {
-    return document.getElementsByClassName("title ytmusic-player-bar")[0].innerText;
+  ymInfoHandler.title = function() {
+    return document.getElementsByClassName("title ytmusic-player-bar")[0]
+      .innerText;
   };
-  ymInfoHandler.artist = function () {
+  ymInfoHandler.artist = function() {
     //If has both artist and album return artist
-    if (document.getElementsByClassName("byline ytmusic-player-bar")[0].children.length > 0) {
-      return document.getElementsByClassName("byline ytmusic-player-bar")[0].children[0].innerText;
+    if (
+      document.getElementsByClassName("byline ytmusic-player-bar")[0].children
+        .length
+    ) {
+      return document.getElementsByClassName("byline ytmusic-player-bar")[0]
+        .children[0].innerText;
     }
     //Otherwise it is a video and just has uploader name
-    return document.getElementsByClassName("byline ytmusic-player-bar")[0].innerText;
+    return document.getElementsByClassName("byline ytmusic-player-bar")[0]
+      .innerText;
   };
-  ymInfoHandler.album = function () {
+  ymInfoHandler.album = function() {
     //If has both artist and album return album
-    if (document.getElementsByClassName("byline ytmusic-player-bar")[0].children.length > 1) {
-      return document.getElementsByClassName("byline ytmusic-player-bar")[0].children[1].innerText;
+    if (
+      document.getElementsByClassName("byline ytmusic-player-bar")[0].children
+        .length > 1
+    ) {
+      return document.getElementsByClassName("byline ytmusic-player-bar")[0]
+        .children[1].innerText;
     }
     //Google stopped putting the name of the album at the end of the queue
     //If queue has a name use that
@@ -55,25 +66,31 @@ function setup() {
     //Otherwise just return it as blank and let the skin handle it
     return "";
   };
-  ymInfoHandler.cover = function () {
-    let videoID = document.getElementsByClassName("ytp-title")[0].children[1].children[0].href;
+  ymInfoHandler.cover = function() {
+    let videoID = document.getElementsByClassName("ytp-title")[0].children[1]
+      .children[0].href;
     videoID = videoID.substring(videoID.lastIndexOf("=") + 1);
-    let cover = document.getElementsByClassName("image ytmusic-player-bar")[0].src;
+    let cover = document.getElementsByClassName("image ytmusic-player-bar")[0]
+      .src;
 
     //Check if cover is from youtube if it is some work need done first
     if (cover.includes("ytimg")) {
       if (lastImgVideoID !== videoID && videoID !== "ttps://www.") {
         lastImgVideoID = videoID;
         let img = document.createElement("img");
-        img.setAttribute("src", "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?");
-        img.addEventListener("load", function () {
+        img.setAttribute(
+          "src",
+          "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?"
+        );
+        img.addEventListener("load", function() {
           if (img.height > 90) {
-            currImg = "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?";
+            currImg =
+              "https://i.ytimg.com/vi/" + videoID + "/maxresdefault.jpg?";
           } else {
             currImg = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
           }
         });
-        img.addEventListener("error", function () {
+        img.addEventListener("error", function() {
           currImg = "https://i.ytimg.com/vi/" + videoID + "/mqdefault.jpg?";
         });
       }
@@ -82,18 +99,22 @@ function setup() {
     cover = cover.substring(0, cover.lastIndexOf("="));
     return cover;
   };
-  ymInfoHandler.durationString = function () {
-    let durTemp = document.getElementsByClassName("time-info ytmusic-player-bar")[0].innerText;
+  ymInfoHandler.durationString = function() {
+    let durTemp = document.getElementsByClassName(
+      "time-info ytmusic-player-bar"
+    )[0].innerText;
     return durTemp.substring(durTemp.indexOf(" / ") + " / ".length);
   };
-  ymInfoHandler.positionString = function () {
-    let posTemp = document.getElementsByClassName("time-info ytmusic-player-bar")[0].innerText;
+  ymInfoHandler.positionString = function() {
+    let posTemp = document.getElementsByClassName(
+      "time-info ytmusic-player-bar"
+    )[0].innerText;
     return posTemp.substring(0, posTemp.indexOf(" / "));
   };
-  ymInfoHandler.volume = function () {
+  ymInfoHandler.volume = function() {
     return document.getElementsByTagName("video")[0].volume;
   };
-  ymInfoHandler.rating = function () {
+  ymInfoHandler.rating = function() {
     //Check if thumbs has two paths, if it does not then it is active
     if (
       document
@@ -112,15 +133,18 @@ function setup() {
 
     return 0;
   };
-  ymInfoHandler.repeat = function () {
+  ymInfoHandler.repeat = function() {
     //Way to check if on repeat
     if (
-      document.getElementsByTagName("ytmusic-player-bar")[0].getAttribute("repeat-mode_") !== "NONE"
+      document
+        .getElementsByTagName("ytmusic-player-bar")[0]
+        .getAttribute("repeat-mode_") !== "NONE"
     ) {
       //Way to check if repeat one
       if (
-        document.getElementsByTagName("ytmusic-player-bar")[0].getAttribute("repeat-mode_") ===
-        "ONE"
+        document
+          .getElementsByTagName("ytmusic-player-bar")[0]
+          .getAttribute("repeat-mode_") === "ONE"
       ) {
         return 2;
       }
@@ -128,7 +152,7 @@ function setup() {
     }
     return 0;
   };
-  ymInfoHandler.shuffle = function () {
+  ymInfoHandler.shuffle = function() {
     //Youtube music does not currently do shuffling really, you just hit the button and it shuffles the queue with no way to tell if already has been
     return 0;
   };
@@ -136,32 +160,34 @@ function setup() {
   let ymEventHandler = createNewMusicEventHandler();
 
   //Define custom check logic to make sure you are not trying to update info when nothing is playing
-  ymEventHandler.readyCheck = function () {
+  ymEventHandler.readyCheck = function() {
     if (
-      document.getElementsByTagName("video").length > 0 &&
-      document.getElementsByClassName("title ytmusic-player-bar")[0].innerText.length > 0
+      document.getElementsByTagName("video").length &&
+      document.getElementsByClassName("title ytmusic-player-bar")[0].innerText
+        .length
     ) {
       return true;
     }
     return false;
   };
 
-  ymEventHandler.playpause = function () {
+  ymEventHandler.playpause = function() {
     document.getElementById("play-pause-button").click();
   };
-  ymEventHandler.next = function () {
+  ymEventHandler.next = function() {
     document.getElementsByClassName("next-button")[0].click();
   };
-  ymEventHandler.previous = function () {
+  ymEventHandler.previous = function() {
     document.getElementsByClassName("previous-button")[0].click();
   };
-  ymEventHandler.progress = function (progress) {
+  ymEventHandler.progress = function(progress) {
     let loc = document
       .getElementById("progress-bar")
       .children[0].children[0].children[0].getBoundingClientRect();
     progress *= loc.width;
 
-    let a = document.getElementById("progress-bar").children[0].children[0].children[0];
+    let a = document.getElementById("progress-bar").children[0].children[0]
+      .children[0];
     let e = document.createEvent("MouseEvents");
     e.initMouseEvent(
       "mousedown",
@@ -200,7 +226,7 @@ function setup() {
     );
     a.dispatchEvent(e);
   };
-  ymEventHandler.volume = function (volume) {
+  ymEventHandler.volume = function(volume) {
     if (document.getElementsByTagName("video")[0].muted && volume > 0) {
       document.getElementsByTagName("video")[0].muted = false;
     } else if (volume == 0) {
@@ -208,19 +234,23 @@ function setup() {
     }
     document.getElementsByTagName("video")[0].volume = volume;
   };
-  ymEventHandler.repeat = function () {
+  ymEventHandler.repeat = function() {
     document.getElementsByClassName("repeat")[0].click();
   };
-  ymEventHandler.shuffle = function () {
+  ymEventHandler.shuffle = function() {
     document.getElementsByClassName("shuffle")[0].click();
   };
-  ymEventHandler.toggleThumbsUp = function () {
-    document.getElementsByClassName("middle-controls-buttons")[0].children[0].children[1].click();
+  ymEventHandler.toggleThumbsUp = function() {
+    document
+      .getElementsByClassName("middle-controls-buttons")[0]
+      .children[0].children[1].click();
   };
-  ymEventHandler.toggleThumbsDown = function () {
-    document.getElementsByClassName("middle-controls-buttons")[0].children[0].children[0].click();
+  ymEventHandler.toggleThumbsDown = function() {
+    document
+      .getElementsByClassName("middle-controls-buttons")[0]
+      .children[0].children[0].click();
   };
-  ymEventHandler.rating = function (rating) {
+  ymEventHandler.rating = function(rating) {
     //Check if thumbs has two paths, if it does not then it is active
     if (rating > 3) {
       //If thumbs up is not active
