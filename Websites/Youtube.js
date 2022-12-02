@@ -12,11 +12,11 @@ function waiveXray(obj) {
 // document wherever possible.
 function getContainer() {
   let preview = document.getElementsByTagName("ytd-video-preview")[0];
-  if (preview?.active) return preview;
+  if (waiveXray(preview)?.get("active")) return preview;
   let miniplayer = document.getElementsByTagName("ytd-miniplayer")[0];
-  if (miniplayer?.active) return miniplayer;
+  if (waiveXray(miniplayer)?.get("active")) return miniplayer;
   let manager = document.getElementsByTagName("ytd-watch-flexy")[0];
-  if (manager?.active) return manager;
+  if (waiveXray(manager)?.get("active")) return manager;
   return document.body.querySelector("ytd-app > #content");
 }
 
@@ -193,7 +193,9 @@ function setup() {
   };
 
   youtubeInfoHandler.readyCheck = function() {
-    let title = findContainerElement(".title, #video-title");
+    let title = findContainerElement(
+      ".metadata .title, #info .title, #meta #video-title"
+    );
     return title && title.innerText?.length > 0;
   };
 
@@ -215,7 +217,9 @@ function setup() {
   youtubeInfoHandler.title = function() {
     let { title } = getVideoDetails();
     if (title) return title;
-    return findContainerElement(".title, #video-title")?.innerText;
+    return findContainerElement(
+      ".metadata .title, #info .title, #meta #video-title"
+    )?.innerText;
   };
 
   youtubeInfoHandler.artist = function() {
