@@ -1,6 +1,8 @@
 // Adds support for YouTube
 /* import-globals-from ../WebNowPlaying.js */
 
+let useChapters = false;
+
 function waiveXray(obj) {
   if (typeof obj === "object") {
     return "wrappedJSObject" in obj ? obj.wrappedJSObject : obj;
@@ -18,6 +20,14 @@ function getContainer() {
   let manager = document.getElementsByTagName("ytd-watch-flexy")[0];
   if (waiveXray(manager)?.get("active")) return manager;
   return document.body.querySelector("ytd-app > #content");
+}
+
+function getVideo() {
+  return document.querySelector(".html5-main-video");
+}
+
+function getCurrentTime() {
+  return waiveXray(getContainer()).get("player.getCurrentTime")?.();
 }
 
 /**
@@ -181,6 +191,155 @@ function checkTopLevelButton(menu, { query, val } = {}) {
   );
 }
 
+/**
+ * Get a list of "chapters" from comments on the video. This can happen in long
+ * videos (like whole music albums) where people comment the time of each song,
+ * and YouTube automatically converts them into fragment links that jump to the
+ * time when clicked. This function finds those links and returns a list of
+ * times in seconds.
+ * @returns {number[]|null} A list of times in seconds, or null if none exist.
+ */
+function findChapterListInComments() {
+  let currentURL = new URL(window.location.href);
+  function getSeconds(el) {
+    if (!el.href) return null;
+    let linkURL = new URL(el.href);
+    if (
+      linkURL.pathname === currentURL.pathname &&
+      linkURL.searchParams.get("v") === currentURL.searchParams.get("v")
+    ) {
+      let timeString = linkURL.searchParams.get("t");
+      if (timeString !== null) {
+        let time = parseInt(timeString);
+        if (!isNaN(time)) return time;
+      }
+    }
+    return null;
+  }
+  let lists = [
+    ...document.querySelectorAll(
+      "ytd-comment-thread-renderer>ytd-comment-renderer#comment"
+    ),
+  ]
+    .map(comment =>
+      [...comment.querySelector("#content-text").children]
+        .map(el => getSeconds(el))
+        .filter(t => t !== null)
+    )
+    .filter(l => l.length > 2)
+    .sort((a, b) => a.length < b.length);
+  return lists[0];
+}
+
+/**
+ * Get a list of "chapters" from a panel rendered by YouTube in the right
+ * sidebar. This can happen if the video author has added a list of timestamps
+ * in the video's description, or if YouTube has automatically calculated the
+ * key moments of the video.
+ * @param {Element} panel The panel to search for the list in. Should be a
+ *                        ytd-engagement-panel-section-list-renderer and the
+ *                        ancestor of a ytd-macro-markers-list-renderer element.
+ * @returns {number[]|null} A list of times in seconds, or null if none exist.
+ */
+function findMarkerList(panel) {
+  if (!panel) return null;
+  let links = [
+    ...panel.querySelectorAll("ytd-macro-markers-list-item-renderer > a"),
+  ];
+  let times = links
+    .map(el => {
+      if (!el.href) return null;
+      let linkURL = new URL(el.href);
+      let timeString = linkURL.searchParams.get("t");
+      if (timeString !== null) {
+        let time = parseInt(timeString);
+        if (!isNaN(time)) return time;
+      }
+      return null;
+    })
+    .filter(t => t !== null);
+  if (times.length > 2) return times;
+  return null;
+}
+
+/**
+ * Look for a list of "chapters" in a variety of places, in order of usefulness.
+ * Returns an array of times in seconds, or null if none exist.
+ * @returns {number[]|null} A list of times in seconds, or null if none exist.
+ */
+function findChapterList() {
+  let container = getContainer();
+  if (
+    container.localName !== "ytd-watch-flexy" &&
+    container?.id !== "content"
+  ) {
+    return null;
+  }
+  // First, check for a list of chapters in the video's description. These are
+  // added by the video author, so they're more likely to be accurate.
+  let descriptionChapters = document.querySelector(
+    `ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-macro-markers-description-chapters"]`
+  );
+  let descriptionChaptersList = findMarkerList(descriptionChapters);
+  if (descriptionChaptersList) return descriptionChaptersList;
+  // If there's no list in the description, check for a list of chapters in the
+  // comments. These are added by viewers, so they're less likely to be
+  // accurate, but they're still better than nothing.
+  let commentList = findChapterListInComments();
+  if (commentList) return commentList;
+  // Finally, look for chapters generated automatically by YouTube's AI. We
+  // ignore auto-generated chapters for videos shorter than 15 minutes, as they
+  // can be annoying or inaccurate in shorter videos.
+  if (getVideo()?.duration > 900) {
+    let autoChapters = document.querySelector(
+      `ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-macro-markers-auto-chapters"]`
+    );
+    let autoChaptersList = findMarkerList(autoChapters);
+    if (autoChaptersList) return autoChaptersList;
+  }
+  return null;
+}
+
+/**
+ * Get the next and previous chapter times in the video, based on chapter lists
+ * found in the document. Not all videos will have a chapter list. If the
+ * current time is within 3 seconds of the start of a chapter, it will return
+ * the chapter before it as the previous time. This is so that the user can
+ * double-tap the skip previous button to go to the previous chapter, rather
+ * than only being able to skip to the start of the current chapter.
+ * @returns {NearestChapters} An object with the next and previous chapter
+ *                            times, or null if no chapters exist.
+ */
+function getNearestChapters() {
+  if (!useChapters) return null;
+  let timeList = findChapterList()?.sort((a, b) => a - b);
+  if (!timeList) return null;
+  let video = getVideo();
+  let current = video.currentTime || getCurrentTime();
+  let next = null;
+  let previous = null;
+  for (let i = 0; i < timeList.length; i++) {
+    if (timeList[i] > current) {
+      next = timeList[i];
+      break;
+    }
+    // If the current time is within 3 seconds of the previous time, it means
+    // they are probably double tapping the skip previous function. So use the
+    // previous previous time. That way the first time they tap, it will go to
+    // the start of the current range, and the second time it will go to the
+    // start of the previous range.
+    previous = current - timeList[i] <= 3 ? previous : timeList[i];
+  }
+
+  /**
+   * @typedef {Object} NearestChapters
+   * @property {number|null} next The next time in seconds, or null.
+   * @property {number|null} previous The previous time in seconds, or null.
+   * @property {number} current The current time in seconds.
+   */
+  return { next, previous, current };
+}
+
 function setup() {
   let lastImgVideoID = "";
   let currImg = "";
@@ -200,7 +359,7 @@ function setup() {
   };
 
   youtubeInfoHandler.state = function() {
-    let video = document.querySelector(".html5-main-video");
+    let video = getVideo();
     let state = video.paused ? 2 : 1;
     if (
       getContainer()
@@ -347,16 +506,16 @@ function setup() {
   youtubeInfoHandler.durationString = function() {
     return (
       findControlElement(".ytp-time-duration")?.innerText ||
-      fancyTimeFormat(document.querySelector(".html5-main-video").duration)
+      fancyTimeFormat(getVideo()?.duration)
     );
   };
 
   youtubeInfoHandler.position = function() {
-    return document.querySelector(".html5-main-video").currentTime;
+    return getVideo()?.currentTime || getCurrentTime();
   };
 
   youtubeInfoHandler.volume = function() {
-    let video = document.querySelector(".html5-main-video");
+    let video = getVideo();
     if (!video.muted) return video.volume;
     return 0;
   };
@@ -392,7 +551,7 @@ function setup() {
   };
 
   youtubeInfoHandler.repeat = function() {
-    if (document.querySelector(".html5-main-video").loop) return 2;
+    if (getVideo()?.loop) return 2;
     let menu = findContainerElement("#playlist-action-menu");
     if (menu?.children.length > 0) {
       return Number(
@@ -424,6 +583,11 @@ function setup() {
   };
 
   youtubeEventHandler.next = function() {
+    let chapters = getNearestChapters();
+    if (chapters?.next) {
+      getVideo().currentTime = chapters.next;
+      return;
+    }
     let next = findControlElement(".ytp-next-button");
     let playlist = findContainerElement(".playlist-items");
     if (
@@ -453,13 +617,18 @@ function setup() {
   };
 
   youtubeEventHandler.previous = function() {
-    let video = document.querySelector(".html5-main-video");
+    let video = getVideo();
+    let chapters = getNearestChapters();
+    if (typeof chapters?.previous == "number") {
+      video.currentTime = chapters.previous;
+      return;
+    }
     let previous = findControlElement(".ytp-prev-button");
     if (previous?.getAttribute("aria-disabled") == "false") {
       previous.click();
     } else if (
       getContainer().localName == "ytd-watch-flexy" &&
-      video.currentTime <= 3
+      (video.currentTime || getCurrentTime()) <= 3
     ) {
       history.back();
     } else {
@@ -468,17 +637,18 @@ function setup() {
   };
 
   youtubeEventHandler.progressSeconds = function(position) {
-    document.querySelector(".html5-main-video").currentTime = position;
+    let video = getVideo();
+    if (video) video.currentTime = position;
   };
 
   youtubeEventHandler.volume = function(volume) {
-    let video = document.querySelector(".html5-main-video");
+    let video = getVideo();
     video.muted = volume == 0;
     video.volume = volume;
   };
 
   youtubeEventHandler.repeat = function() {
-    let video = document.querySelector(".html5-main-video");
+    let video = getVideo();
     let menu = findContainerElement("#playlist-action-menu");
     let state = checkTopLevelButton(menu, { query: "playlistLoopStateEntity" });
     if (menu.children.length && state != null) {
@@ -533,4 +703,8 @@ function setup() {
   youtubeEventHandler.rating = function(rating) {
     youtubeEventHandler[`toggleThumbs${rating < 3 ? "Down" : "Up"}`]();
   };
+
+  chrome.storage.sync
+    .get({ useChapters })
+    .then(res => (useChapters = res.useChapters));
 }
