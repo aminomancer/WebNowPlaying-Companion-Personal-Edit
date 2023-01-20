@@ -5,8 +5,36 @@ let useChapters = false;
 
 function waiveXray(obj) {
   if (typeof obj === "object") {
-    return "wrappedJSObject" in obj ? obj.wrappedJSObject : obj;
+    if ("wrappedJSObject" in obj) return obj.wrappedJSObject;
   }
+  return obj;
+}
+
+function findInPossibleXray(obj, key) {
+  if (typeof obj === "object") {
+    let unwrapped = waiveXray(obj);
+    let unwrappedGot = unwrapped.get?.(key);
+    if (unwrappedGot) return unwrappedGot;
+    let got = obj.get?.(key);
+    if (got) return got;
+    // If we don't find the target through get(), try to find it with a normal
+    // accessor. Keys can have period accessors, which are passed to get() as a
+    // single complete string (e.g. "prop1.prop2.prop3"). So we need to access
+    // the properties in the same way by splitting the key.
+    let keys = key.split(".");
+    for (let key of keys) {
+      unwrapped = waiveXray(unwrapped)?.[key];
+      if (!unwrapped) break;
+    }
+    if (unwrapped) return unwrapped;
+    let prop = obj;
+    for (let key of keys) {
+      prop = prop?.[key];
+      if (!prop) break;
+    }
+    if (prop) return prop;
+  }
+  return null;
 }
 
 // There's a main container and a miniplayer container. We usually want to
@@ -14,11 +42,11 @@ function waiveXray(obj) {
 // document wherever possible.
 function getContainer() {
   let preview = document.getElementsByTagName("ytd-video-preview")[0];
-  if (waiveXray(preview)?.get("active")) return preview;
+  if (findInPossibleXray(preview, "active")) return preview;
   let miniplayer = document.getElementsByTagName("ytd-miniplayer")[0];
-  if (waiveXray(miniplayer)?.get("active")) return miniplayer;
+  if (findInPossibleXray(miniplayer, "active")) return miniplayer;
   let manager = document.getElementsByTagName("ytd-watch-flexy")[0];
-  if (waiveXray(manager)?.get("active")) return manager;
+  if (findInPossibleXray(manager, "active")) return manager;
   return document.body.querySelector("ytd-app > #content");
 }
 
@@ -27,7 +55,7 @@ function getVideo() {
 }
 
 function getCurrentTime() {
-  return waiveXray(getContainer()).get("player.getCurrentTime")?.();
+  return findInPossibleXray(getContainer(), "player.getCurrentTime")?.();
 }
 
 /**
@@ -66,20 +94,23 @@ function getVideoDetails() {
   let container = getContainer();
   switch (container.localName) {
     case "ytd-video-preview":
-      details = waiveXray(container).get(
+      details = findInPossibleXray(
+        container,
         "videoPreviewFetchRequest.result_.videoDetails"
       );
       break;
     case "ytd-miniplayer":
-      details = waiveXray(container).get(
+      details = findInPossibleXray(
+        container,
         "watchResponse.playerResponse.videoDetails"
       );
       break;
     case "ytd-watch-flexy":
-      details = waiveXray(container).get("playerData.videoDetails");
+      details = findInPossibleXray(container, "playerData.videoDetails");
       break;
     default:
-      details = waiveXray(document.querySelector("ytd-app"))?.get(
+      details = findInPossibleXray(
+        document.querySelector("ytd-app"),
         "data.playerResponse.videoDetails"
       );
       break;
@@ -89,7 +120,7 @@ function getVideoDetails() {
 
 // Synchronously retrieve info about the playlist without parsing DOM.
 function getPlaylistDetails() {
-  let playlist = waiveXray(findContainerElement("#playlist"))?.get("data");
+  let playlist = findInPossibleXray(findContainerElement("#playlist"), "data");
   return playlist ?? {};
 }
 
@@ -120,7 +151,7 @@ function clickTopLevelButton(menu, { query, val } = {}) {
 
   buttons = [...buttons.children];
   let button = buttons.find(btn => {
-    let found = waiveXray(btn)?.get(query);
+    let found = findInPossibleXray(btn, query);
     if (val) return found === val;
     return !!found;
   });
@@ -163,13 +194,13 @@ function checkTopLevelButton(menu, { query, val } = {}) {
 
   buttons = [...buttons.children];
   let button = buttons.find(btn => {
-    let found = waiveXray(btn)?.get(query);
+    let found = findInPossibleXray(btn, query);
     if (val) return found === val;
     return !!found;
   });
   if (!button) return null;
 
-  let data = waiveXray(button)?.get("data");
+  let data = findInPossibleXray(button, "data");
   if (data && data.states) {
     let states = [...data.states]?.map(state => {
       for (let prop in state) {
@@ -177,10 +208,11 @@ function checkTopLevelButton(menu, { query, val } = {}) {
           return state[prop].state;
         }
       }
+      return null;
     });
     if (states) {
       // loop states = ["PLAYLIST_LOOP_STATE_NONE", "PLAYLIST_LOOP_STATE_ALL", "PLAYLIST_LOOP_STATE_ONE"];
-      let currentState = waiveXray(button)?.get("currentState");
+      let currentState = findInPossibleXray(button, "currentState");
       if (currentState) return Math.max(states.indexOf(currentState), 0);
     }
   }
@@ -237,8 +269,8 @@ function findChapterListInComments() {
  * in the video's description, or if YouTube has automatically calculated the
  * key moments of the video.
  * @param {Element} panel The panel to search for the list in. Should be a
- *                        ytd-engagement-panel-section-list-renderer and the
- *                        ancestor of a ytd-macro-markers-list-renderer element.
+ *   ytd-engagement-panel-section-list-renderer and the ancestor of a
+ *   ytd-macro-markers-list-renderer element.
  * @returns {number[]|null} A list of times in seconds, or null if none exist.
  */
 function findMarkerList(panel) {
@@ -308,7 +340,7 @@ function findChapterList() {
  * double-tap the skip previous button to go to the previous chapter, rather
  * than only being able to skip to the start of the current chapter.
  * @returns {NearestChapters} An object with the next and previous chapter
- *                            times, or null if no chapters exist.
+ *   times, or null if no chapters exist.
  */
 function getNearestChapters() {
   if (!useChapters) return null;
@@ -484,7 +516,7 @@ function setup() {
       img.setAttribute("src", strr + videoId + qual);
       img.addEventListener("load", function() {
         if (img.height > 90) currImg = strr + videoId + qual;
-        else currImg = strr + videoId + "/hqdefault.jpg?";
+        else currImg = `${strr + videoId}/hqdefault.jpg?`;
       });
       img.addEventListener("error", function() {
         if (img.src.includes("maxresdefault")) {
@@ -599,7 +631,9 @@ function setup() {
         .querySelector("#meta")
         ?.click();
     } else if (
-      !playlist.querySelector("#playlist-items:last-of-type")?.selected
+      !playlist
+        .querySelector("#playlist-items:last-of-type")
+        ?.hasAttribute("selected")
     ) {
       playlist
         .querySelector("#playlist-items[selected]")

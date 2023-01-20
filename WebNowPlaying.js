@@ -32,7 +32,7 @@ o888o   o888o o888ooooood8 o888ooooood8 o888o        o888ooooood8 o888o  o888o 8
 */
 function pad(number, length) {
   let str = String(number);
-  while (str.length < length) str = "0" + str;
+  while (str.length < length) str = `0${str}`;
   return str;
 }
 
@@ -40,15 +40,12 @@ function pad(number, length) {
 function convertTimeToString(timeInSeconds) {
   let timeInMinutes = parseInt(timeInSeconds / 60);
   if (timeInMinutes < 60) {
-    return timeInMinutes + ":" + pad(parseInt(timeInSeconds % 60), 2);
+    return `${timeInMinutes}:${pad(parseInt(timeInSeconds % 60), 2)}`;
   }
-  return (
-    parseInt(timeInMinutes / 60) +
-    ":" +
-    pad(parseInt(timeInMinutes % 60), 2) +
-    ":" +
-    pad(parseInt(timeInSeconds % 60), 2)
-  );
+  return `${parseInt(timeInMinutes / 60)}:${pad(
+    parseInt(timeInMinutes % 60),
+    2
+  )}:${pad(parseInt(timeInSeconds % 60), 2)}`;
 }
 
 // A fallback currently used as a fallback on YouTube.
@@ -61,11 +58,11 @@ function fancyTimeFormat(time) {
 
   // Output like "1:01" or "4:03:59" or "123:03:59"
   let ret = "";
-  if (days > 0) ret += "" + days + ":" + (hrs < 10 ? "0" : "");
-  if (hrs > 0) ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
-  if (mins > 0) ret += "" + mins + ":" + (secs < 10 ? "0" : "");
-  else ret += "" + 0 + ":";
-  ret += "" + secs;
+  if (days > 0) ret += `${days}:${hrs < 10 ? "0" : ""}`;
+  if (hrs > 0) ret += `${hrs}:${mins < 10 ? "0" : ""}`;
+  if (mins > 0) ret += `${mins}:${secs < 10 ? "0" : ""}`;
+  else ret += `${0}:`;
+  ret += `${secs}`;
   return ret;
 }
 
@@ -159,15 +156,15 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("STATE:" + temp);
+          ws.send(`STATE:${temp}`);
           currState = temp;
           if (currState > 0) chrome.runtime.sendMessage({ method: "open" });
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating state for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating state for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE TITLE
@@ -179,14 +176,14 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("TITLE:" + temp);
+          ws.send(`TITLE:${temp}`);
           currTitle = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating title for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating title for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE ARTIST
@@ -198,14 +195,14 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("ARTIST:" + temp);
+          ws.send(`ARTIST:${temp}`);
           currArtist = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating artist for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating artist for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE ALBUM
@@ -217,14 +214,14 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("ALBUM:" + temp);
+          ws.send(`ALBUM:${temp}`);
           currAlbum = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating album for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating album for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE COVER
@@ -236,14 +233,14 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("COVER:" + temp.replace("https://", "http://"));
+          ws.send(`COVER:${temp.replace("https://", "http://")}`);
           currCover = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating cover for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating cover for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE DURATION
@@ -255,20 +252,20 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("DURATION:" + temp);
+          ws.send(`DURATION:${temp}`);
           currDur = temp;
         }
       } else if (musicInfo.duration !== null) {
         temp = musicInfo.duration();
         if (currDur !== temp && temp !== null && !isNaN(temp)) {
-          ws.send("DURATION:" + convertTimeToString(temp));
+          ws.send(`DURATION:${convertTimeToString(temp)}`);
           currDur = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating duration for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating duration for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE POSITION
@@ -280,20 +277,20 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("POSITION:" + temp);
+          ws.send(`POSITION:${temp}`);
           currPos = temp;
         }
       } else if (musicInfo.position !== null) {
         temp = musicInfo.position();
         if (currPos !== temp && temp !== null && !isNaN(temp)) {
-          ws.send("POSITION:" + convertTimeToString(temp));
+          ws.send(`POSITION:${convertTimeToString(temp)}`);
           currPos = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating position for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating position for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE VOLUME
@@ -301,14 +298,14 @@ function updateInfo() {
       if (musicInfo.volume !== null) {
         temp = parseFloat(musicInfo.volume()) * 100;
         if (currVolume !== temp && temp !== null && !isNaN(temp)) {
-          ws.send("VOLUME:" + temp);
+          ws.send(`VOLUME:${temp}`);
           currVolume = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating volume for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating volume for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE RATING
@@ -320,14 +317,14 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("RATING:" + temp);
+          ws.send(`RATING:${temp}`);
           currRating = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating rating for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating rating for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE REPEAT
@@ -339,14 +336,14 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("REPEAT:" + temp);
+          ws.send(`REPEAT:${temp}`);
           currRepeat = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating repeat for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating repeat for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE SHUFFLE
@@ -358,14 +355,14 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("SHUFFLE:" + temp);
+          ws.send(`SHUFFLE:${temp}`);
           currShuffle = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating shuffle for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating shuffle for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
 
@@ -379,14 +376,14 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("TRACKID:" + temp);
+          ws.send(`TRACKID:${temp}`);
           currShuffle = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating trackID for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating trackID for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE ARTISTID
@@ -398,14 +395,14 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("ARTISTID:" + temp);
+          ws.send(`ARTISTID:${temp}`);
           currShuffle = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating artistID for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating artistID for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
     //UPDATE ALBUMID
@@ -417,18 +414,18 @@ function updateInfo() {
           temp !== null &&
           ws.readyState == WebSocket.OPEN
         ) {
-          ws.send("ALBUMID:" + temp);
+          ws.send(`ALBUMID:${temp}`);
           currShuffle = temp;
         }
       }
     } catch (e) {
       if (ws.readyState == WebSocket.OPEN) {
-        ws.send("Error:Error updating albumID for " + musicInfo.player());
-        ws.send("ErrorD:" + e);
+        ws.send(`Error:Error updating albumID for ${musicInfo.player()}`);
+        ws.send(`ErrorD:${e}`);
       }
     }
   } else if (currState !== 0) {
-    ws.send("STATE:" + 0);
+    ws.send(`STATE:${0}`);
     currState = 0;
   }
 }
@@ -500,8 +497,9 @@ function fireEvent(event) {
       if (connected) updateInfo();
     }
   } catch (e) {
-    ws.send("Error:Error sending event to " + musicInfo.player);
-    ws.send("ErrorD:" + e);
+    ws.send(`Error:Error sending event to ${musicInfo.player}`);
+    ws.send(`ErrorD:${e}`);
+    console.log(e);
     throw e;
   }
 }
@@ -521,7 +519,7 @@ function init() {
   ws.onopen = function() {
     connected = true;
     currPlayer = musicInfo.player();
-    ws.send("PLAYER:" + currPlayer);
+    ws.send(`PLAYER:${currPlayer}`);
     sendData = setInterval(() => updateInfo(), 50);
     if (!(currState && currState > 0)) {
       chrome.runtime.sendMessage({ method: "closed" });
@@ -537,13 +535,13 @@ function init() {
     try {
       fireEvent(event);
     } catch (e) {
-      ws.send("Error:" + e);
+      ws.send(`Error:${e}`);
       throw e;
     }
   };
   ws.onerror = function(event) {
     if (typeof event.data != "undefined") {
-      console.error("Websocket Error:" + event.data);
+      console.error(`Websocket Error:${event.data}`);
     }
   };
 
