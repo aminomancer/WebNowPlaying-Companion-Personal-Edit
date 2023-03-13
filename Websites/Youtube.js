@@ -219,7 +219,8 @@ function checkTopLevelButton(menu, { query, val } = {}) {
 
   return (
     button.classList.contains("style-default-active") ||
-    button.getAttribute("aria-pressed") == "true"
+    button.getAttribute("aria-pressed") == "true" ||
+    !!button.querySelector("[aria-pressed='true']")
   );
 }
 

@@ -4,7 +4,7 @@
   "name": "WebNowPlaying Companion - Personal Edit",
   "short_name": "WebNowPlayingPersonal",
   "description": "WebNowPlaying Companion with a variety of modifications, fixes, and updates. Especially a lot of feature improvements and optimizations for YouTube.",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "browser_specific_settings": {
     "gecko": {
       "id": "WNPC@aminomancer",
